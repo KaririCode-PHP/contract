@@ -3,6 +3,35 @@
 All notable changes to `kariricode/contract` are documented here.
 The format follows Keep a Changelog; versions follow Semantic Versioning.
 
+## [2.10.0] — 2026-09-30
+
+Additive release (ADR-004). **There is no breaking change:** every type of
+2.8.6 and 2.9.0 keeps its API, which `BackwardCompatibilityTest` verifies
+against Reflection snapshots of both releases.
+
+### Added
+
+- `Resilience\RateLimiter` and `Resilience\RateLimitDecision`, with the
+  signatures `kariricode/rate-limiter` 4.0.0 implements (its
+  `contract-proposal/`).
+- `Resilience\CallPermit` and `Resilience\ManualCircuitBreaker` (extends
+  `CircuitBreaker`): the manual permit protocol of
+  `kariricode/circuit-breaker` 4.0.0, plus `tryAcquirePermit()` and
+  `releasePermit()`.
+- `Resilience\RetryPolicy`: whether to retry and how long to wait. No
+  implementation exists yet.
+- ADR-004; the 2.9.0 API snapshot; unit tests with a minimal implementation
+  of each port; conformance checks for the E-005 docblock criteria and for
+  synchronous signatures.
+
+- `psalm-strict.xml` and `composer psalm-strict`: Psalm error level 1, without
+  baseline, over the source added since 2.9.0; part of `composer check`.
+
+### Changed
+
+- `BackwardCompatibilityTest` also guards the 2.9.0 API.
+- README, SPEC-001 and QD-V40-COMPLIANCE describe 2.10.0.
+
 ## [2.9.0] — 2026-09-30
 
 Additive release on the 2.x line (ADR-002). **There is no breaking change:**

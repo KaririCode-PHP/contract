@@ -35,9 +35,10 @@
         "test-conformance": "phpunit --testsuite=conformance",
         "phpstan": "phpstan analyse --no-progress",
         "psalm": "psalm --no-cache",
+        "psalm-strict": "psalm -c psalm-strict.xml --no-cache",
         "cs-check": "php-cs-fixer fix --dry-run --diff",
         "cs-fix": "php-cs-fixer fix",
-        "check": ["@cs-check", "@phpstan", "@psalm", "@test"]
+        "check": ["@cs-check", "@phpstan", "@psalm", "@psalm-strict", "@test"]
     },
     "extra": {
         "arfa": {"version": "1.3", "level": 1},

@@ -1,0 +1,3565 @@
+{
+    "package": "kariricode/contract",
+    "version": "2.9.0",
+    "reference": "sha256:86b11923ea913650a8c4a3e877be4c734057ace9b40d0e434ba985f1b2946217",
+    "php": "8.4.23",
+    "types": {
+        "KaririCode\\Contract\\Configuration\\ConfigProvider": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "defaults": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "namespace": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": []
+                },
+                "schema": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Configuration\\ValueProcessor": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "process": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "value",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "supports": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "value",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DI\\Compiler": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "compile": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\DI\\Container",
+                    "parameters": [
+                        {
+                            "name": "container",
+                            "type": "KaririCode\\Contract\\DI\\Container",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "loadFromFile": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\DI\\Container",
+                    "parameters": [
+                        {
+                            "name": "path",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "writeToFile": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "path",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DI\\Container": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "alias": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "abstract",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "alias",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "bind": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "abstract",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "concrete",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "parameters",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "call": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "callback",
+                            "type": "callable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "parameters",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "extend": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "abstract",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "extender",
+                            "type": "Closure",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "factory": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "abstract",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "concrete",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "parameters",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "get": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "has": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "resolve": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "object",
+                    "parameters": [
+                        {
+                            "name": "abstract",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "set": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "service",
+                            "type": "callable",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "singleton": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "abstract",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "concrete",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "parameters",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "tag": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "tag",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "abstracts",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "tagged": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": [
+                        {
+                            "name": "tag",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DI\\Definition": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getConcrete": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "getParameters": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "getTags": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "isFactory": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": []
+                },
+                "isSingleton": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DI\\Provider": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "boot": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "container",
+                            "type": "KaririCode\\Contract\\DI\\Container",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "register": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "container",
+                            "type": "KaririCode\\Contract\\DI\\Container",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\Comparable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "compareTo": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "int",
+                    "parameters": [
+                        {
+                            "name": "other",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\Countable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "size": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "int",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\Indexable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "get": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "index",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "set": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "index",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\IterableCollection": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "Traversable"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getIterator": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "Iterator",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\Iterator": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "hasNext": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": []
+                },
+                "next": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "add": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "clear": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": []
+                },
+                "remove": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "contains": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "find": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Behavioral\\Sortable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "sort": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Deque": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable",
+                "KaririCode\\Contract\\DataStructure\\Queue"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "addFirst": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "peekLast": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "removeLast": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Heap": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "add": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "insert": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "index",
+                            "type": "int",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "peek": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "poll": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "remove": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Map": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Countable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\IterableCollection",
+                "Traversable"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "clear": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": []
+                },
+                "containsKey": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "get": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "keys": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "put": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "value",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "remove": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "values": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Queue": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "dequeue": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "enqueue": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "peek": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Set": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable",
+                "Traversable"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "difference": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\DataStructure\\Set",
+                    "parameters": [
+                        {
+                            "name": "other",
+                            "type": "KaririCode\\Contract\\DataStructure\\Set",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "intersection": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\DataStructure\\Set",
+                    "parameters": [
+                        {
+                            "name": "other",
+                            "type": "KaririCode\\Contract\\DataStructure\\Set",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "union": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\DataStructure\\Set",
+                    "parameters": [
+                        {
+                            "name": "other",
+                            "type": "KaririCode\\Contract\\DataStructure\\Set",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Stack": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "peek": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "pop": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "push": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "element",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Structural\\BPlusTreeCollection": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Countable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Indexable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Sortable",
+                "KaririCode\\Contract\\DataStructure\\Structural\\Collection",
+                "KaririCode\\Contract\\DataStructure\\Tree"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "balance": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": []
+                },
+                "getMaximum": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "getMinimum": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                },
+                "getOrder": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "int",
+                    "parameters": []
+                },
+                "rangeSearch": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": [
+                        {
+                            "name": "start",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "end",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Structural\\Collection": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Countable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Indexable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "addAll": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "collection",
+                            "type": "KaririCode\\Contract\\DataStructure\\Structural\\Collection",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "getItems": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Structural\\Serializable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "deserialize": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "data",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "serialize": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\DataStructure\\Tree": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable",
+                "KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "insert": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "index",
+                            "type": "int",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "value",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Environment\\EnvironmentResolver": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "get": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "?string",
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "has": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\ImmutableValue": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": []
+        },
+        "KaririCode\\Contract\\Logging\\Behavioral\\Configurable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getConfig": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\ImmutableValue",
+                    "parameters": []
+                },
+                "setConfig": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Logging\\Behavioral\\Configurable",
+                    "parameters": [
+                        {
+                            "name": "config",
+                            "type": "KaririCode\\Contract\\ImmutableValue",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Behavioral\\Loggable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "alert": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "critical": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "debug": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "emergency": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "error": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "info": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "log": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "level",
+                            "type": "KaririCode\\Contract\\Logging\\LogLevel",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "notice": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "warning": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "type": "Stringable|string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Behavioral\\LoggerConfigurable": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "configure": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "config",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\LogFormatter": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "format": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": [
+                        {
+                            "name": "record",
+                            "type": "KaririCode\\Contract\\ImmutableValue",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "formatBatch": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": [
+                        {
+                            "name": "records",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\LogHandler": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "handle": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "record",
+                            "type": "KaririCode\\Contract\\ImmutableValue",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "isHandling": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "record",
+                            "type": "KaririCode\\Contract\\ImmutableValue",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\LogLevel": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getColor": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": []
+                },
+                "getLevel": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": []
+                },
+                "getValue": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "int",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\LogProcessor": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "process": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\ImmutableValue",
+                    "parameters": [
+                        {
+                            "name": "record",
+                            "type": "KaririCode\\Contract\\ImmutableValue",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\LogRotator": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "rotate": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "filename",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "shouldRotate": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": [
+                        {
+                            "name": "filePath",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Logger": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\Logging\\Behavioral\\Loggable"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getName": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\LoggerExtendedInterface": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\Logging\\Behavioral\\Loggable",
+                "KaririCode\\Contract\\Logging\\Logger"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "addHandler": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "self",
+                    "parameters": [
+                        {
+                            "name": "handler",
+                            "type": "KaririCode\\Contract\\Logging\\Structural\\HandlerAware",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "addProcessor": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "self",
+                    "parameters": [
+                        {
+                            "name": "processor",
+                            "type": "KaririCode\\Contract\\Logging\\Structural\\ProcessorAware",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "getName": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": []
+                },
+                "setFormatter": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "self",
+                    "parameters": [
+                        {
+                            "name": "formatter",
+                            "type": "KaririCode\\Contract\\Logging\\Structural\\FormatterAware",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\LoggingManager": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\Logging\\Behavioral\\Configurable",
+                "KaririCode\\Contract\\Logging\\Behavioral\\Loggable",
+                "KaririCode\\Contract\\Logging\\Structural\\ContextAware",
+                "KaririCode\\Contract\\Logging\\Structural\\FormatterAware",
+                "KaririCode\\Contract\\Logging\\Structural\\HandlerAware",
+                "KaririCode\\Contract\\Logging\\Structural\\ProcessorAware"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getName": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Structural\\ContextAware": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getContext": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "withContext": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "self",
+                    "parameters": [
+                        {
+                            "name": "context",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Structural\\FormatterAware": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getFormatter": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\ImmutableValue",
+                    "parameters": []
+                },
+                "setFormatter": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Logging\\Structural\\FormatterAware",
+                    "parameters": [
+                        {
+                            "name": "formatter",
+                            "type": "KaririCode\\Contract\\ImmutableValue",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Structural\\HandlerAware": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "addHandler": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Logging\\Structural\\HandlerAware",
+                    "parameters": [
+                        {
+                            "name": "handler",
+                            "type": "KaririCode\\Contract\\Logging\\LogHandler",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "level",
+                            "type": "?KaririCode\\Contract\\Logging\\LogLevel",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "null"
+                        }
+                    ]
+                },
+                "getHandlers": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "popHandler": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "?KaririCode\\Contract\\Logging\\LogHandler",
+                    "parameters": []
+                },
+                "pushHandler": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Logging\\Structural\\HandlerAware",
+                    "parameters": [
+                        {
+                            "name": "handler",
+                            "type": "KaririCode\\Contract\\Logging\\LogHandler",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Structural\\LoggerAware": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "setLogger": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "logger",
+                            "type": "KaririCode\\Contract\\Logging\\Logger",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Logging\\Structural\\ProcessorAware": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "addProcessor": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Logging\\Structural\\ProcessorAware",
+                    "parameters": [
+                        {
+                            "name": "processor",
+                            "type": "KaririCode\\Contract\\Logging\\LogProcessor",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "getProcessors": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute": {
+            "kind": "class",
+            "abstract": true,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\Processor\\Attribute\\CustomizableMessageAttribute",
+                "KaririCode\\Contract\\Processor\\Attribute\\ProcessableAttribute"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": false,
+                    "final": false,
+                    "byReference": false,
+                    "return": null,
+                    "parameters": [
+                        {
+                            "name": "processors",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "messages",
+                            "type": "?array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "null"
+                        }
+                    ]
+                },
+                "getMessage": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": false,
+                    "final": false,
+                    "byReference": false,
+                    "return": "?string",
+                    "parameters": [
+                        {
+                            "name": "processorName",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "getProcessors": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": false,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\Attribute\\CustomizableMessageAttribute": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getMessage": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "?string",
+                    "parameters": [
+                        {
+                            "name": "validatorName",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\Attribute\\ProcessableAttribute": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getProcessors": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\ConfigurableProcessor": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\Processor\\Processor"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "configure": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "options",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\Pipeline": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "addProcessor": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "self",
+                    "parameters": [
+                        {
+                            "name": "processor",
+                            "type": "KaririCode\\Contract\\Processor\\Processor",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "process": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "input",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\ProcessingResult": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "addError": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "property",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "errorKey",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "message",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "clear": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": []
+                },
+                "getErrors": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "getProcessedData": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                },
+                "hasErrors": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": []
+                },
+                "setProcessedData": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": [
+                        {
+                            "name": "property",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "value",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "toArray": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "array",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\Processor": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "process": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "input",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\ProcessorBuilder": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "build": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Processor\\Processor",
+                    "parameters": [
+                        {
+                            "name": "context",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "processorConfig",
+                            "type": "array",
+                            "optional": true,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": "[]"
+                        }
+                    ]
+                },
+                "buildPipeline": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Processor\\Pipeline",
+                    "parameters": [
+                        {
+                            "name": "context",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "processorSpecs",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\ProcessorRegistry": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "get": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\Processor\\Processor",
+                    "parameters": [
+                        {
+                            "name": "context",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "getContextProcessors": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "KaririCode\\Contract\\DataStructure\\Map",
+                    "parameters": [
+                        {
+                            "name": "context",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "register": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "self",
+                    "parameters": [
+                        {
+                            "name": "context",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "processor",
+                            "type": "KaririCode\\Contract\\Processor\\Processor",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\ProcessorValidator": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "validate": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "?array",
+                    "parameters": [
+                        {
+                            "name": "processor",
+                            "type": "KaririCode\\Contract\\Processor\\Processor",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "processorName",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        },
+                        {
+                            "name": "messages",
+                            "type": "array",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Processor\\ValidatableProcessor": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "KaririCode\\Contract\\Processor\\Processor"
+            ],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "getErrorKey": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "?string",
+                    "parameters": []
+                },
+                "isValid": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": []
+                },
+                "reset": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "void",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Resilience\\CallNotPermittedException": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [
+                "Stringable",
+                "Throwable"
+            ],
+            "constants": [],
+            "properties": {
+                "retryAfterSeconds": {
+                    "visibility": "public",
+                    "static": false,
+                    "readonly": false,
+                    "abstract": true,
+                    "final": false,
+                    "virtual": true,
+                    "setVisibility": null,
+                    "type": "?int",
+                    "hooks": [
+                        "get"
+                    ],
+                    "default": null
+                }
+            },
+            "methods": []
+        },
+        "KaririCode\\Contract\\Resilience\\CircuitBreaker": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "execute": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "operation",
+                            "type": "callable",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "isOpen": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "bool",
+                    "parameters": []
+                }
+            }
+        },
+        "KaririCode\\Contract\\Sanitizer\\Sanitizer": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "sanitize": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "input",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Serializer\\Serializer": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "deserialize": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "data",
+                            "type": "string",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                },
+                "serialize": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "string",
+                    "parameters": [
+                        {
+                            "name": "input",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Transformer\\Transformer": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "transform": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "object",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        },
+        "KaririCode\\Contract\\Validator\\Validator": {
+            "kind": "interface",
+            "abstract": false,
+            "final": false,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "validate": {
+                    "visibility": "public",
+                    "static": false,
+                    "abstract": true,
+                    "final": false,
+                    "byReference": false,
+                    "return": "mixed",
+                    "parameters": [
+                        {
+                            "name": "input",
+                            "type": "mixed",
+                            "optional": false,
+                            "variadic": false,
+                            "byReference": false,
+                            "promoted": false,
+                            "default": null
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "files": {
+        "Configuration/ConfigProvider.php": [
+            "KaririCode\\Contract\\Configuration\\ConfigProvider"
+        ],
+        "Configuration/ValueProcessor.php": [
+            "KaririCode\\Contract\\Configuration\\ValueProcessor"
+        ],
+        "DI/Compiler.php": [
+            "KaririCode\\Contract\\DI\\Compiler"
+        ],
+        "DI/Container.php": [
+            "KaririCode\\Contract\\DI\\Container"
+        ],
+        "DI/Definition.php": [
+            "KaririCode\\Contract\\DI\\Definition"
+        ],
+        "DI/Provider.php": [
+            "KaririCode\\Contract\\DI\\Provider"
+        ],
+        "DataStructure/Behavioral/Comparable.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\Comparable"
+        ],
+        "DataStructure/Behavioral/Countable.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\Countable"
+        ],
+        "DataStructure/Behavioral/Indexable.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\Indexable"
+        ],
+        "DataStructure/Behavioral/IterableCollection.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\IterableCollection"
+        ],
+        "DataStructure/Behavioral/Iterator.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\Iterator"
+        ],
+        "DataStructure/Behavioral/Modifiable.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable"
+        ],
+        "DataStructure/Behavioral/Searchable.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable"
+        ],
+        "DataStructure/Behavioral/Sortable.php": [
+            "KaririCode\\Contract\\DataStructure\\Behavioral\\Sortable"
+        ],
+        "DataStructure/Deque.php": [
+            "KaririCode\\Contract\\DataStructure\\Deque"
+        ],
+        "DataStructure/Heap.php": [
+            "KaririCode\\Contract\\DataStructure\\Heap"
+        ],
+        "DataStructure/Map.php": [
+            "KaririCode\\Contract\\DataStructure\\Map"
+        ],
+        "DataStructure/Queue.php": [
+            "KaririCode\\Contract\\DataStructure\\Queue"
+        ],
+        "DataStructure/Set.php": [
+            "KaririCode\\Contract\\DataStructure\\Set"
+        ],
+        "DataStructure/Stack.php": [
+            "KaririCode\\Contract\\DataStructure\\Stack"
+        ],
+        "DataStructure/Structural/BPlusTreeCollection.php": [
+            "KaririCode\\Contract\\DataStructure\\Structural\\BPlusTreeCollection"
+        ],
+        "DataStructure/Structural/Collection.php": [
+            "KaririCode\\Contract\\DataStructure\\Structural\\Collection"
+        ],
+        "DataStructure/Structural/Serializable.php": [
+            "KaririCode\\Contract\\DataStructure\\Structural\\Serializable"
+        ],
+        "DataStructure/Tree.php": [
+            "KaririCode\\Contract\\DataStructure\\Tree"
+        ],
+        "Environment/EnvironmentResolver.php": [
+            "KaririCode\\Contract\\Environment\\EnvironmentResolver"
+        ],
+        "ImmutableValue.php": [
+            "KaririCode\\Contract\\ImmutableValue"
+        ],
+        "Logging/Behavioral/Configurable.php": [
+            "KaririCode\\Contract\\Logging\\Behavioral\\Configurable"
+        ],
+        "Logging/Behavioral/Loggable.php": [
+            "KaririCode\\Contract\\Logging\\Behavioral\\Loggable"
+        ],
+        "Logging/Behavioral/LoggerConfigurable.php": [
+            "KaririCode\\Contract\\Logging\\Behavioral\\LoggerConfigurable"
+        ],
+        "Logging/LogFormatter.php": [
+            "KaririCode\\Contract\\Logging\\LogFormatter"
+        ],
+        "Logging/LogHandler.php": [
+            "KaririCode\\Contract\\Logging\\LogHandler"
+        ],
+        "Logging/LogLevel.php": [
+            "KaririCode\\Contract\\Logging\\LogLevel"
+        ],
+        "Logging/LogProcessor.php": [
+            "KaririCode\\Contract\\Logging\\LogProcessor"
+        ],
+        "Logging/LogRotator.php": [
+            "KaririCode\\Contract\\Logging\\LogRotator"
+        ],
+        "Logging/Logger.php": [
+            "KaririCode\\Contract\\Logging\\Logger"
+        ],
+        "Logging/LoggerExtended.php": [
+            "KaririCode\\Contract\\Logging\\LoggerExtendedInterface"
+        ],
+        "Logging/LoggingManager.php": [
+            "KaririCode\\Contract\\Logging\\LoggingManager"
+        ],
+        "Logging/Structural/ContextAware.php": [
+            "KaririCode\\Contract\\Logging\\Structural\\ContextAware"
+        ],
+        "Logging/Structural/FormatterAware.php": [
+            "KaririCode\\Contract\\Logging\\Structural\\FormatterAware"
+        ],
+        "Logging/Structural/HandlerAware.php": [
+            "KaririCode\\Contract\\Logging\\Structural\\HandlerAware"
+        ],
+        "Logging/Structural/LoggerAware.php": [
+            "KaririCode\\Contract\\Logging\\Structural\\LoggerAware"
+        ],
+        "Logging/Structural/ProcessorAware.php": [
+            "KaririCode\\Contract\\Logging\\Structural\\ProcessorAware"
+        ],
+        "Processor/Attribute/BaseProcessorAttribute.php": [
+            "KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute"
+        ],
+        "Processor/Attribute/CustomizableMessageAttribute.php": [
+            "KaririCode\\Contract\\Processor\\Attribute\\CustomizableMessageAttribute"
+        ],
+        "Processor/Attribute/ProcessableAttribute.php": [
+            "KaririCode\\Contract\\Processor\\Attribute\\ProcessableAttribute"
+        ],
+        "Processor/ConfigurableProcessor.php": [
+            "KaririCode\\Contract\\Processor\\ConfigurableProcessor"
+        ],
+        "Processor/Pipeline.php": [
+            "KaririCode\\Contract\\Processor\\Pipeline"
+        ],
+        "Processor/ProcessingResult.php": [
+            "KaririCode\\Contract\\Processor\\ProcessingResult"
+        ],
+        "Processor/Processor.php": [
+            "KaririCode\\Contract\\Processor\\Processor"
+        ],
+        "Processor/ProcessorBuilder.php": [
+            "KaririCode\\Contract\\Processor\\ProcessorBuilder"
+        ],
+        "Processor/ProcessorRegistry.php": [
+            "KaririCode\\Contract\\Processor\\ProcessorRegistry"
+        ],
+        "Processor/ProcessorValidator.php": [
+            "KaririCode\\Contract\\Processor\\ProcessorValidator"
+        ],
+        "Processor/ValidatableProcessor.php": [
+            "KaririCode\\Contract\\Processor\\ValidatableProcessor"
+        ],
+        "Resilience/CallNotPermittedException.php": [
+            "KaririCode\\Contract\\Resilience\\CallNotPermittedException"
+        ],
+        "Resilience/CircuitBreaker.php": [
+            "KaririCode\\Contract\\Resilience\\CircuitBreaker"
+        ],
+        "Sanitizer/Sanitizer.php": [
+            "KaririCode\\Contract\\Sanitizer\\Sanitizer"
+        ],
+        "Serializer/Serializer.php": [
+            "KaririCode\\Contract\\Serializer\\Serializer"
+        ],
+        "Transformer/Transformer.php": [
+            "KaririCode\\Contract\\Transformer\\Transformer"
+        ],
+        "Validator/Validator.php": [
+            "KaririCode\\Contract\\Validator\\Validator"
+        ]
+    }
+}

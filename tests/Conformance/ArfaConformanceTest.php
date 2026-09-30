@@ -18,8 +18,9 @@ use ReflectionMethod;
  * deviations named in INHERITED_DEVIATIONS: code frozen since 2.8.6 by the
  * 2.x compatibility promise (ADR-002), each one a 3.0.0 item of
  * docs/quality/QD-V40-COMPLIANCE.md. A new violation anywhere fails, and so
- * does a listed deviation that no longer exists. The namespaces added in
- * 2.9.0 have no exceptions.
+ * does a listed deviation that no longer exists. The namespaces added since
+ * 2.9.0 have no exceptions, and the 2.10.0 resilience ports must document
+ * the E-005 criteria.
  */
 final class ArfaConformanceTest extends TestCase
 {
@@ -38,7 +39,21 @@ final class ArfaConformanceTest extends TestCase
         'KaririCode\\Contract\\Configuration\\ValueProcessor',
         'KaririCode\\Contract\\Environment\\EnvironmentResolver',
         'KaririCode\\Contract\\Resilience\\CallNotPermittedException',
+        'KaririCode\\Contract\\Resilience\\CallPermit',
         'KaririCode\\Contract\\Resilience\\CircuitBreaker',
+        'KaririCode\\Contract\\Resilience\\ManualCircuitBreaker',
+        'KaririCode\\Contract\\Resilience\\RateLimitDecision',
+        'KaririCode\\Contract\\Resilience\\RateLimiter',
+        'KaririCode\\Contract\\Resilience\\RetryPolicy',
+    ];
+
+    /** Ports added in 2.10.0; their docblocks follow the E-005 criteria. */
+    private const array RESILIENCE_PORTS = [
+        \KaririCode\Contract\Resilience\CallPermit::class,
+        \KaririCode\Contract\Resilience\ManualCircuitBreaker::class,
+        \KaririCode\Contract\Resilience\RateLimitDecision::class,
+        \KaririCode\Contract\Resilience\RateLimiter::class,
+        \KaririCode\Contract\Resilience\RetryPolicy::class,
     ];
 
     private const array INHERITED_DEVIATIONS = [
@@ -246,6 +261,58 @@ final class ArfaConformanceTest extends TestCase
         }
 
         self::assertSame([], $excepted);
+    }
+
+    #[Test]
+    public function theResiliencePortsDocumentTheFiveCriteria(): void
+    {
+        $missing = [];
+
+        foreach (self::RESILIENCE_PORTS as $port) {
+            $docblock = (string) (new ReflectionClass($port))->getDocComment();
+            $criteria = [
+                'preconditions (C2)' => 'Preconditions',
+                'thread-safety (C3)' => 'Thread-safety:',
+                'example (C4)' => 'Example',
+                'references (C5)' => 'References:',
+            ];
+
+            foreach ($criteria as $criterion => $marker) {
+                if (!str_contains($docblock, $marker)) {
+                    $missing[] = $port . ': ' . $criterion;
+                }
+            }
+
+            if (!str_contains($docblock, '@see https://')) {
+                $missing[] = $port . ': @see link (C5)';
+            }
+        }
+
+        self::assertSame([], $missing);
+    }
+
+    #[Test]
+    public function theResiliencePortsAreSynchronousInterfaces(): void
+    {
+        $found = [];
+
+        foreach (self::RESILIENCE_PORTS as $port) {
+            $type = new ReflectionClass($port);
+            self::assertTrue($type->isInterface(), $port);
+
+            foreach ($type->getMethods() as $method) {
+                $signature = (string) $method->getReturnType() . ' ' . implode(' ', array_map(
+                    static fn(\ReflectionParameter $parameter): string => (string) $parameter->getType(),
+                    $method->getParameters(),
+                ));
+
+                if (preg_match('/Promise|Deferred|Awaitable|Fiber|Generator/', $signature) === 1) {
+                    $found[] = $port . '::' . $method->getName();
+                }
+            }
+        }
+
+        self::assertSame([], $found);
     }
 
     #[Test]

@@ -29,17 +29,20 @@ The package follows four rules:
 - **Additive within 2.x.** Every 2.8.6 type is unchanged in 2.9.0, and a
   test compares the public API against a snapshot of 2.8.6 (ADR-002).
 
-2.9.0 adds five interfaces that already have implementations and consumers:
-the resilience contracts of `kariricode/circuit-breaker` 4.0.0 and the
-environment and configuration contracts of Configurator ADR-007.
+2.9.0 added the circuit breaker contract of `kariricode/circuit-breaker`
+4.0.0 and the environment and configuration contracts of Configurator
+ADR-007. 2.10.0 adds the resilience ports a processor pipeline composes:
+rate limiting (`kariricode/rate-limiter` 4.0.0), the manual permit protocol
+of the circuit breaker, and retry policies (ADR-004).
 
 ## Installation
 
 ```bash
-composer require kariricode/contract:^2.9
+composer require kariricode/contract:^2.10
 ```
 
-2.9.0 requires PHP 8.4 or newer, because interfaces declare properties.
+Since 2.9.0 the package requires PHP 8.4 or newer, because interfaces
+declare properties.
 Projects on PHP 8.3 keep resolving 2.8.x within the same `^2.x`
 constraint.
 
@@ -75,18 +78,49 @@ final readonly class ExchangeRates
 
 | Interface | Members | Implemented by |
 |---|---|---|
-| `Resilience\CircuitBreaker` | `execute(callable $operation): mixed`, `isOpen(): bool` | `kariricode/circuit-breaker` 4.0.0 |
-| `Resilience\CallNotPermittedException` | extends `Throwable`; `?int $retryAfterSeconds { get; }` | `CircuitOpenException` in the same package |
+| `Resilience\CircuitBreaker` (2.9.0) | `execute(callable $operation): mixed`, `isOpen(): bool` | `kariricode/circuit-breaker` 4.0.0 |
+| `Resilience\CallNotPermittedException` (2.9.0) | extends `Throwable`; `?int $retryAfterSeconds { get; }` | circuit-breaker's `CircuitOpenException` |
+| `Resilience\ManualCircuitBreaker` (2.10.0) | extends `CircuitBreaker`; `tryAcquirePermit(): ?CallPermit`, `acquirePermit(): CallPermit`, `recordSuccess(CallPermit)`, `recordFailure(CallPermit, Throwable)`, `releasePermit(CallPermit)` | circuit-breaker 4.0.0, after the changes in SPEC-001 §8.4 |
+| `Resilience\CallPermit` (2.10.0) | none: opaque proof of one admitted call | circuit-breaker's `Core\CallPermit` |
+| `Resilience\RateLimiter` (2.10.0) | `attempt(string $key, int $cost = 1)`, `peek(string $key)`, `reset(string $key)` | `kariricode/rate-limiter` 4.0.0 |
+| `Resilience\RateLimitDecision` (2.10.0) | get-only `bool $allowed`, `int $limit`, `int $remaining`, `int $retryAfter`, `int $resetAfter` | rate-limiter's `RateLimitResult` |
+| `Resilience\RetryPolicy` (2.10.0) | `shouldRetry(Throwable $error, int $attempt): bool`, `delayMilliseconds(Throwable $error, int $attempt): int` | none yet (`kariricode/retry` planned) |
 
 - `execute()` runs the operation only when the call is admitted and returns
-  its result; an exception thrown by the operation is rethrown unchanged.
-- A rejected call throws `CallNotPermittedException` without running the
-  operation. `retryAfterSeconds` is the delay in whole seconds, or null when
-  unknown.
-- `isOpen()` is advisory and has no side effect; `execute()` stays the
-  authority.
+  its result; an exception thrown by the operation is rethrown unchanged. A
+  rejection throws `CallNotPermittedException` without running the operation.
+- The manual protocol is acquire, run, settle once. `tryAcquirePermit()`
+  returns null instead of throwing; `releasePermit()` settles a permit whose
+  call did not run. Pass every Throwable to `recordFailure()`: the breaker
+  decides whether it counts.
+- A rate limit is per key, with a cost. A denial is a value: nothing is
+  consumed, and `retryAfter` says how many seconds until the same call can
+  succeed.
+- A retry policy only decides. The caller counts attempts (`$attempt` = calls
+  already made, all failed) and waits `delayMilliseconds()`.
+- `isOpen()` is advisory and has no side effect.
 
-A `readonly` property satisfies the interface property; no hook is needed,
+A decorator that puts the rate limit between admission and the call:
+
+```php
+$permit = $breaker->tryAcquirePermit();
+if ($permit === null) {
+    return $this->skip($stage);               // open, or half-open trials in use
+}
+if (!$limiter->attempt($stage)->allowed) {
+    $breaker->releasePermit($permit);         // admitted, but the call will not run
+    return $this->throttle($stage);
+}
+try {
+    $output = $processor->process($input);
+} catch (\Throwable $error) {
+    $breaker->recordFailure($permit, $error);
+    throw $error;
+}
+$breaker->recordSuccess($permit);
+```
+
+A `readonly` property satisfies an interface property; no hook is needed,
 and none is allowed in readonly types (errata E-013, SPEC-001 §9):
 
 ```php
@@ -99,8 +133,9 @@ final class CircuitOpen extends \RuntimeException implements CallNotPermittedExc
 }
 ```
 
-The contract carries no transport data (ARFA 1.3 P4). The HTTP edge maps a
-rejection to `503 Service Unavailable` with `Retry-After` (RFC 9110):
+The contracts carry no transport data (ARFA 1.3 P4). The HTTP edge maps a
+rejection to `503 Service Unavailable` and a denial to `429 Too Many
+Requests`, both with `Retry-After` (RFC 9110, RFC 6585):
 
 ```php
 } catch (CallNotPermittedException $rejected) {
@@ -180,9 +215,10 @@ final readonly class QueueConfigProvider implements ConfigProvider
 
 ## Inherited Contracts
 
-The 54 types of 2.8.6 keep their names, namespaces and signatures.
-`tests/Compatibility` compares them with a Reflection snapshot of the 2.8.6
-dist; any difference in an inherited type fails.
+The 54 types of 2.8.6, and the five added in 2.9.0, keep their names,
+namespaces and signatures. `tests/Compatibility` compares them with
+Reflection snapshots of the 2.8.6 dist and of the 2.9.0 release; any
+difference in an earlier type fails.
 
 | Namespace | Purpose |
 |---|---|
@@ -204,7 +240,7 @@ it (the case since 2.8.6). Do not type against it.
 
 ## All Contracts
 
-59 types in 17 namespaces; the full signatures are in SPEC-001 §3.
+64 types in 17 namespaces; the full signatures are in SPEC-001 §3.
 
 | Namespace | Types | Since |
 |---|---|---|
@@ -220,7 +256,7 @@ it (the case since 2.8.6). Do not type against it.
 | `Logging\Structural` | `ContextAware`, `FormatterAware`, `HandlerAware`, `LoggerAware`, `ProcessorAware` | ≤ 2.8.6 |
 | `Processor` | `ConfigurableProcessor`, `Pipeline`, `ProcessingResult`, `Processor`, `ProcessorBuilder`, `ProcessorRegistry`, `ProcessorValidator`, `ValidatableProcessor` | ≤ 2.8.6 |
 | `Processor\Attribute` | `BaseProcessorAttribute`, `CustomizableMessageAttribute`, `ProcessableAttribute` | ≤ 2.8.6 |
-| `Resilience` | `CallNotPermittedException`, `CircuitBreaker` | 2.9.0 |
+| `Resilience` | `CallNotPermittedException` (2.9.0), `CallPermit` (2.10.0), `CircuitBreaker` (2.9.0), `ManualCircuitBreaker` (2.10.0), `RateLimitDecision` (2.10.0), `RateLimiter` (2.10.0), `RetryPolicy` (2.10.0) | 2.9.0, 2.10.0 |
 | `Sanitizer` | `Sanitizer` | ≤ 2.8.6 |
 | `Serializer` | `Serializer` | ≤ 2.8.6 |
 | `Transformer` | `Transformer` | ≤ 2.8.6 |
@@ -242,17 +278,21 @@ The Spec V4.0 rules checked by `tests/Conformance/ArfaConformanceTest`:
 interfaces only, no `Interface`/`Manager`/`Helper`/`Util` names, no getters
 without parameters, no `toArray()`/`jsonSerialize()`, one type per file named
 after it, typed constants, no hooks in readonly types (E-013), no authorship
-tags in docblocks, no runtime dependency. The quality record is **PENDING**
+tags in docblocks, no runtime dependency; for the 2.10.0 ports, the E-005
+docblock criteria and synchronous signatures. The quality record is **PENDING**
 until the gates run in CI.
 
 ## Ecosystem Position
 
 ```
- implemented by                     contract                consumed by
- circuit-breaker 4.0.0 ───────────▶ Resilience     ◀─────── dataflow, observability, processor-pipeline
- dotenv, configurator  ───────────▶ Environment    ◀─────── configurator (interpolation)
- components, configurator ────────▶ Configuration  ◀─────── configurator (builder, value chain)
- configurator (ConfigurationProcessor) ─▶ Processor ◀────── processor-pipeline (registry)
+ implemented by                     contract                  consumed by
+ circuit-breaker 4.0.0 ───────────▶ CircuitBreaker      ◀─── dataflow, observability, processor-pipeline
+                                    ManualCircuitBreaker ◀── processor-pipeline, dataflow (async stages)
+ rate-limiter 4.0.0 ──────────────▶ RateLimiter         ◀─── processor-pipeline, observability, dataflow, authenticator
+ kariricode/retry (planned) ──────▶ RetryPolicy         ◀─── processor-pipeline; dataflow, observability (optional)
+ dotenv, configurator ────────────▶ Environment         ◀─── configurator (interpolation)
+ components, configurator ────────▶ Configuration       ◀─── configurator (builder, value chain)
+ configurator (ConfigurationProcessor) ─▶ Processor     ◀─── processor-pipeline (registry)
 ```
 
 Cache and events between packages go through PSR-16 and PSR-14, not
@@ -261,8 +301,8 @@ through this package (ADR-001).
 On Packagist, checked 2026-09-30, the latest tagged version of each
 `kariricode/*` package that requires the contract asks for `^2.0` to `^2.8`:
 data-structure `^2.0`, configurator and logging `^2.6`, validator `^2.7`,
-processor-pipeline and property-inspector `^2.8`. 2.9.0 satisfies all of
-them on PHP 8.4. Migration of the 2.9 consumers: SPEC-001 §8.
+processor-pipeline and property-inspector `^2.8`. 2.10.0 satisfies all of
+them on PHP 8.4. Migration of the consumers: SPEC-001 §8.
 
 ## Architecture
 
@@ -277,9 +317,9 @@ docs/adr/  docs/spec/  docs/quality/
 
 - The package depends on PHP only; every other package depends on it, never
   the reverse.
-- The API snapshot (`tests/Compatibility/fixtures/2.8.6.json`) was captured
-  by Reflection from the untouched 2.8.6 dist before any change;
-  `dump-api.php` regenerates it.
+- The API snapshots (`tests/Compatibility/fixtures/2.8.6.json` and
+  `2.9.0.json`) were captured by Reflection before the next release changed
+  anything; `dump-api.php` regenerates them.
 - Inherited source and tests are frozen: PHP CS Fixer skips them, and the
   PHPStan and Psalm baselines hold only findings in inherited files.
 
@@ -289,13 +329,14 @@ Measured on 2026-09-30 in a local sandbox with PHP 8.4.23, not in CI.
 
 | Metric | Value |
 |---|---|
-| Types | 59 (58 interfaces, 1 inherited abstract class), 17 namespaces |
-| Public methods | 147 (138 inherited, 9 new); interface properties: 1 |
-| PHP lines in `src/` | 2,373 (186 new) |
+| Types | 64 (63 interfaces, 1 inherited abstract class), 17 namespaces |
+| Public methods | 157 (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0); interface properties: 6 |
+| PHP lines in `src/` | 2,631 (258 new in 2.10.0) |
 | Runtime dependencies | 0 |
-| Tests | 195 tests, 500 assertions, all passing |
+| Tests | 217 tests, 3,795 assertions, all passing |
 | PHPStan (level max) | 0 errors; baseline of 46 findings in 17 inherited files |
 | Psalm (error level 2) | 0 errors; baseline of 10 findings in 6 inherited files |
+| Psalm (error level 1, strict) | 0 errors, no baseline, over the source added since 2.9.0 (`composer psalm-strict`) |
 | Line coverage | not measured (no coverage driver available) |
 
 ## License

@@ -1,6 +1,6 @@
 # kariricode/contract — Documentation
 
-Index of the design records for version 2.9.0. Read them in this order: the
+Index of the design records for version 2.10.0. Read them in this order: the
 specification states what the package contains and promises, the ADRs state
 why, and the quality record states what has been verified.
 
@@ -10,6 +10,7 @@ why, and the quality record states what has been verified.
 | [ADR-001](adr/ADR-001-scope-and-promotion.md) | Decision | what belongs in the contract; promotion needs a second real consumer and an ADR; PSR-16 / PSR-14 between packages |
 | [ADR-002](adr/ADR-002-release-2.9.0-on-the-2.x-line.md) | Decision | 2.9.0 instead of 4.x; PHP ^8.4 |
 | [ADR-003](adr/ADR-003-unsuffixed-names.md) | Decision | names without suffix; ADR-007 contracts renamed before first publication; Resilience from CircuitBreaker |
+| [ADR-004](adr/ADR-004-resilience-ports.md) | Decision | resilience ports: rate limiter, manual circuit breaker with permits, retry policy |
 | [QD-V40-COMPLIANCE](quality/QD-V40-COMPLIANCE.md) | Quality record | gates, local evidence, 3.0.0 items — **PENDING** |
 
 ## Architecture at a glance
@@ -20,8 +21,8 @@ why, and the quality record states what has been verified.
                             interfaces only
                             depends on PHP ≥ 8.4, nothing else
 
- Resilience      ◀── circuit-breaker 4.0.0 (implements)
-                 ◀── dataflow, observability, processor-pipeline (consume)
+ Resilience      ◀── circuit-breaker 4.0.0, rate-limiter 4.0.0 (implement)
+                 ◀── processor-pipeline, dataflow, observability, authenticator (consume)
  Environment     ◀── dotenv, configurator (implement and consume)
  Configuration   ◀── components (providers), configurator (processors, builder)
  2.8.6 contracts ◀── unchanged; processor-pipeline and five more on Packagist

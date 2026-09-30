@@ -1,24 +1,27 @@
-# SPEC-001: kariricode/contract 2.9.0
+# SPEC-001: kariricode/contract 2.10.0
 
 | Field | Value |
 |---|---|
 | Status | Accepted (content); quality gate PENDING — see QD-V40-COMPLIANCE |
 | Date | 2026-09-30 |
-| Component | kariricode/contract 2.9.0 |
+| Component | kariricode/contract 2.10.0 |
 | Authors | Walmir Silva <walmir.silva@kariricode.org> |
 | Standards | ARFA 1.3 (level 1); KaririCode Code Quality Directive V4.0 |
 | Error codes | none: the package declares interfaces and throws nothing |
 | PHP | ^8.4 |
-| Base | 2.8.6 Packagist dist, reference `35935418be93009a1ce389460e6fbf87353f0dd7` |
+| Base | 2.8.6 Packagist dist, reference `35935418be93009a1ce389460e6fbf87353f0dd7`; 2.9.0 release tarball, SHA-256 `86b11923ea913650a8c4a3e877be4c734057ace9b40d0e434ba985f1b2946217` |
 
 ## 1. Scope
 
 `kariricode/contract` holds the interfaces that KaririCode packages share,
 so that one package implements a contract and others type against it
-without depending on each other (ADR-001). 2.9.0 is the 2.8.6 package plus
-five interfaces, with no change to any inherited type (ADR-002).
+without depending on each other (ADR-001). 2.9.0 added five interfaces to
+the 2.8.6 package (ADR-002, ADR-003); 2.10.0 adds five resilience ports
+(ADR-004). No type of an earlier release changed.
 
-## 2. New API
+## 2. API Added Since 2.8.6
+
+### 2.1 In 2.9.0
 
 ```php
 namespace KaririCode\Contract\Resilience;
@@ -83,10 +86,75 @@ Processors form a chain applied in registration order to every scalar value
 after parsing and before validation; a later processor sees the output of
 an earlier one (`ValueProcessorTest::aChainAppliesEachSupportingProcessorInOrder`).
 
+### 2.2 In 2.10.0 (ADR-004)
+
+```php
+namespace KaririCode\Contract\Resilience;
+
+interface RateLimiter
+{
+    public function attempt(string $key, int $cost = 1): RateLimitDecision;
+
+    public function peek(string $key): RateLimitDecision;
+
+    /** @throws \RuntimeException when the state store cannot be reached */
+    public function reset(string $key): void;
+}
+
+interface RateLimitDecision
+{
+    public bool $allowed { get; }
+    public int $limit { get; }
+    public int $remaining { get; }
+    public int $retryAfter { get; }
+    public int $resetAfter { get; }
+}
+
+interface CallPermit {}
+
+interface ManualCircuitBreaker extends CircuitBreaker
+{
+    public function tryAcquirePermit(): ?CallPermit;
+
+    /** @throws CallNotPermittedException when the call is not admitted */
+    public function acquirePermit(): CallPermit;
+
+    public function recordSuccess(CallPermit $permit): void;
+
+    public function recordFailure(CallPermit $permit, \Throwable $error): void;
+
+    public function releasePermit(CallPermit $permit): void;
+}
+
+interface RetryPolicy
+{
+    public function shouldRetry(\Throwable $error, int $attempt): bool;
+
+    public function delayMilliseconds(\Throwable $error, int $attempt): int;
+}
+```
+
+| Member | Semantics | Verified by |
+|---|---|---|
+| `RateLimiter::attempt()` | consumes `$cost` units when allowed, nothing when denied; a denial is a value; `$cost` must be between 1 and the limiter's capacity, other costs are rejected with an exception | `RateLimiterTest` |
+| `RateLimiter::peek()` | answers for one unit, consumes nothing | `peekAnswersForOneUnitWithoutConsuming` |
+| `RateLimiter::reset()` | restores the key's full quota; throws when the store is unreachable | `resetRestoresTheFullQuota` |
+| `RateLimitDecision` | `0 ≤ remaining ≤ limit`; `retryAfter` is 0 when allowed and ≥ 1 when denied; whole seconds, rounded up | `aDenialConsumesNothingAndSaysWhenToRetry`, `aReadonlyClassSatisfiesTheDecisionWithoutHooks` |
+| `ManualCircuitBreaker::tryAcquirePermit()` | a permit, or null when the call is not admitted (open, half-open trials in use, state unknown under fail-closed); never throws for a rejection | `tryAcquirePermitReturnsNullInsteadOfThrowingWhenOpen` |
+| `ManualCircuitBreaker::acquirePermit()` | a permit, or `CallNotPermittedException` carrying `retryAfterSeconds` | `acquirePermitReportsTheRejectionWithItsDelay` |
+| `recordSuccess()`, `recordFailure()` | settle the permit once, on the breaker that issued it; the breaker decides whether an error counts, so ignored errors never open the circuit; the implementation measures the duration from the permit | `theBreakerDecidesWhichFailuresCount`, `aPermitSettlesExactlyOnce`, `aPermitIsSettledOnlyByTheBreakerThatIssuedIt` |
+| `releasePermit()` | the admitted call did not run: nothing is recorded, a half-open trial slot is freed | `aReleasedPermitRecordsNothing` |
+| `RetryPolicy::shouldRetry()` | `$attempt` is the number of calls already made, all failed (1 after the first failure); the policy classifies the error | `attemptCountsTheCallsAlreadyMade`, `thePolicyClassifiesTheError` |
+| `RetryPolicy::delayMilliseconds()` | asked only after `shouldRetry()` returned true; milliseconds, ≥ 0; may honour a wait the error carries; jitter expected | `delaysStayInsideTheFullJitterEnvelope`, `theDelayHonoursTheWaitAnErrorCarries` |
+
+Units: the limiter's waits (`retryAfter`, `resetAfter`) and the breaker's
+hint (`retryAfterSeconds`) are whole seconds; retry delays are milliseconds.
+
 ## 3. Inventory
 
-59 types in 17 namespaces: 58 interfaces and one inherited abstract class.
-147 public methods (138 inherited, 9 new) and one interface property (new).
+64 types in 17 namespaces: 63 interfaces and one inherited abstract class.
+157 public methods (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0) and six
+interface properties (one from 2.9.0, five from 2.10.0).
 
 ### 3.1 Namespaces
 
@@ -104,7 +172,7 @@ an earlier one (`ValueProcessorTest::aChainAppliesEachSupportingProcessorInOrder
 | `Logging\Structural` | `ContextAware`, `FormatterAware`, `HandlerAware`, `LoggerAware`, `ProcessorAware` | ≤ 2.8.6 |
 | `Processor` | `ConfigurableProcessor`, `Pipeline`, `ProcessingResult`, `Processor`, `ProcessorBuilder`, `ProcessorRegistry`, `ProcessorValidator`, `ValidatableProcessor` | ≤ 2.8.6 |
 | `Processor\Attribute` | `BaseProcessorAttribute`, `CustomizableMessageAttribute`, `ProcessableAttribute` | ≤ 2.8.6 |
-| `Resilience` | `CallNotPermittedException`, `CircuitBreaker` | 2.9.0 |
+| `Resilience` | `CallNotPermittedException` (2.9.0), `CallPermit` (2.10.0), `CircuitBreaker` (2.9.0), `ManualCircuitBreaker` (2.10.0), `RateLimitDecision` (2.10.0), `RateLimiter` (2.10.0), `RetryPolicy` (2.10.0) | 2.9.0, 2.10.0 |
 | `Sanitizer` | `Sanitizer` | ≤ 2.8.6 |
 | `Serializer` | `Serializer` | ≤ 2.8.6 |
 | `Transformer` | `Transformer` | ≤ 2.8.6 |
@@ -112,152 +180,156 @@ an earlier one (`ValueProcessorTest::aChainAppliesEachSupportingProcessorInOrder
 
 ### 3.2 Types and members
 
-Generated by Reflection from `src/`; `Extends / implements` lists direct
-parents only.
+Generated by Reflection from `src/`; `Extends` lists direct parents only.
 
 **`(root)`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `ImmutableValue` | interface | — | — (marker) |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `ImmutableValue` | ≤ 2.8.6 | interface | — | — (marker) |
 
-**`Configuration`** — new in 2.9.0
+**`Configuration`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `ConfigProvider` | interface | — | `namespace(): string`<br>`defaults(): array`<br>`schema(): array` |
-| `ValueProcessor` | interface | — | `supports(mixed $value): bool`<br>`process(mixed $value): mixed` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `ConfigProvider` | 2.9.0 | interface | — | `namespace(): string`<br>`defaults(): array`<br>`schema(): array` |
+| `ValueProcessor` | 2.9.0 | interface | — | `supports(mixed $value): bool`<br>`process(mixed $value): mixed` |
 
 **`DI`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Compiler` | interface | — | `compile(DI\Container $container): DI\Container`<br>`writeToFile(string $path): void`<br>`loadFromFile(string $path): DI\Container` |
-| `Container` | interface | — | `set(string $id, callable $service): void`<br>`get(string $id): mixed`<br>`has(string $id): bool`<br>`resolve(string $abstract): object`<br>`bind(string $abstract, mixed $concrete, array $parameters = []): void`<br>`singleton(string $abstract, mixed $concrete, array $parameters = []): void`<br>`factory(string $abstract, mixed $concrete, array $parameters = []): void`<br>`tag(string $tag, array $abstracts): void`<br>`tagged(string $tag): array`<br>`call(callable|string $callback, array $parameters = []): mixed`<br>`extend(string $abstract, Closure $extender): void`<br>`alias(string $abstract, string $alias): void` |
-| `Definition` | interface | — | `getConcrete(): mixed`<br>`getParameters(): array`<br>`getTags(): array`<br>`isSingleton(): bool`<br>`isFactory(): bool` |
-| `Provider` | interface | — | `register(DI\Container $container): void`<br>`boot(DI\Container $container): void` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Compiler` | ≤ 2.8.6 | interface | — | `compile(DI\Container $container): DI\Container`<br>`writeToFile(string $path): void`<br>`loadFromFile(string $path): DI\Container` |
+| `Container` | ≤ 2.8.6 | interface | — | `set(string $id, callable $service): void`<br>`get(string $id): mixed`<br>`has(string $id): bool`<br>`resolve(string $abstract): object`<br>`bind(string $abstract, mixed $concrete, array $parameters = []): void`<br>`singleton(string $abstract, mixed $concrete, array $parameters = []): void`<br>`factory(string $abstract, mixed $concrete, array $parameters = []): void`<br>`tag(string $tag, array $abstracts): void`<br>`tagged(string $tag): array`<br>`call(callable|string $callback, array $parameters = []): mixed`<br>`extend(string $abstract, Closure $extender): void`<br>`alias(string $abstract, string $alias): void` |
+| `Definition` | ≤ 2.8.6 | interface | — | `getConcrete(): mixed`<br>`getParameters(): array`<br>`getTags(): array`<br>`isSingleton(): bool`<br>`isFactory(): bool` |
+| `Provider` | ≤ 2.8.6 | interface | — | `register(DI\Container $container): void`<br>`boot(DI\Container $container): void` |
 
 **`DataStructure`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Deque` | interface | `DataStructure\Queue` | `addFirst(mixed $element): void`<br>`removeLast(): mixed`<br>`peekLast(): mixed` |
-| `Heap` | interface | — | `add(mixed $element): void`<br>`insert(int $index, mixed $element): void`<br>`poll(): mixed`<br>`remove(mixed $element): bool`<br>`peek(): mixed` |
-| `Map` | interface | `DataStructure\Behavioral\Countable`, `DataStructure\Behavioral\IterableCollection` | `put(mixed $key, mixed $value): void`<br>`get(mixed $key): mixed`<br>`remove(mixed $key): bool`<br>`containsKey(mixed $key): bool`<br>`keys(): array`<br>`values(): array`<br>`clear(): void` |
-| `Queue` | interface | `DataStructure\Behavioral\Modifiable` | `enqueue(mixed $element): void`<br>`dequeue(): mixed`<br>`peek(): mixed` |
-| `Set` | interface | `DataStructure\Behavioral\Modifiable`, `DataStructure\Behavioral\Searchable`, `\Traversable` | `union(DataStructure\Set $other): DataStructure\Set`<br>`intersection(DataStructure\Set $other): DataStructure\Set`<br>`difference(DataStructure\Set $other): DataStructure\Set` |
-| `Stack` | interface | — | `push(mixed $element): void`<br>`pop(): mixed`<br>`peek(): mixed` |
-| `Tree` | interface | `DataStructure\Behavioral\Modifiable`, `DataStructure\Behavioral\Searchable` | `insert(int $index, mixed $value): void` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Deque` | ≤ 2.8.6 | interface | `DataStructure\Queue` | `addFirst(mixed $element): void`<br>`removeLast(): mixed`<br>`peekLast(): mixed` |
+| `Heap` | ≤ 2.8.6 | interface | — | `add(mixed $element): void`<br>`insert(int $index, mixed $element): void`<br>`poll(): mixed`<br>`remove(mixed $element): bool`<br>`peek(): mixed` |
+| `Map` | ≤ 2.8.6 | interface | `DataStructure\Behavioral\Countable`, `DataStructure\Behavioral\IterableCollection` | `put(mixed $key, mixed $value): void`<br>`get(mixed $key): mixed`<br>`remove(mixed $key): bool`<br>`containsKey(mixed $key): bool`<br>`keys(): array`<br>`values(): array`<br>`clear(): void` |
+| `Queue` | ≤ 2.8.6 | interface | `DataStructure\Behavioral\Modifiable` | `enqueue(mixed $element): void`<br>`dequeue(): mixed`<br>`peek(): mixed` |
+| `Set` | ≤ 2.8.6 | interface | `DataStructure\Behavioral\Modifiable`, `DataStructure\Behavioral\Searchable`, `\Traversable` | `union(DataStructure\Set $other): DataStructure\Set`<br>`intersection(DataStructure\Set $other): DataStructure\Set`<br>`difference(DataStructure\Set $other): DataStructure\Set` |
+| `Stack` | ≤ 2.8.6 | interface | — | `push(mixed $element): void`<br>`pop(): mixed`<br>`peek(): mixed` |
+| `Tree` | ≤ 2.8.6 | interface | `DataStructure\Behavioral\Modifiable`, `DataStructure\Behavioral\Searchable` | `insert(int $index, mixed $value): void` |
 
 **`DataStructure\Behavioral`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Comparable` | interface | — | `compareTo(mixed $other): int` |
-| `Countable` | interface | — | `size(): int` |
-| `Indexable` | interface | — | `get(mixed $index): mixed`<br>`set(mixed $index, mixed $element): void` |
-| `IterableCollection` | interface | `\Traversable` | `getIterator(): Iterator` |
-| `Iterator` | interface | — | `next(): mixed`<br>`hasNext(): bool` |
-| `Modifiable` | interface | — | `add(mixed $element): void`<br>`remove(mixed $element): bool`<br>`clear(): void` |
-| `Searchable` | interface | — | `contains(mixed $element): bool`<br>`find(mixed $element): mixed` |
-| `Sortable` | interface | — | `sort(): void` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Comparable` | ≤ 2.8.6 | interface | — | `compareTo(mixed $other): int` |
+| `Countable` | ≤ 2.8.6 | interface | — | `size(): int` |
+| `Indexable` | ≤ 2.8.6 | interface | — | `get(mixed $index): mixed`<br>`set(mixed $index, mixed $element): void` |
+| `IterableCollection` | ≤ 2.8.6 | interface | `\Traversable` | `getIterator(): Iterator` |
+| `Iterator` | ≤ 2.8.6 | interface | — | `next(): mixed`<br>`hasNext(): bool` |
+| `Modifiable` | ≤ 2.8.6 | interface | — | `add(mixed $element): void`<br>`remove(mixed $element): bool`<br>`clear(): void` |
+| `Searchable` | ≤ 2.8.6 | interface | — | `contains(mixed $element): bool`<br>`find(mixed $element): mixed` |
+| `Sortable` | ≤ 2.8.6 | interface | — | `sort(): void` |
 
 **`DataStructure\Structural`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `BPlusTreeCollection` | interface | `DataStructure\Behavioral\Sortable`, `DataStructure\Structural\Collection`, `DataStructure\Tree` | `getOrder(): int`<br>`rangeSearch(mixed $start, mixed $end): array`<br>`getMinimum(): mixed`<br>`getMaximum(): mixed`<br>`balance(): void` |
-| `Collection` | interface | `DataStructure\Behavioral\Countable`, `DataStructure\Behavioral\Indexable`, `DataStructure\Behavioral\Modifiable`, `DataStructure\Behavioral\Searchable` | `addAll(DataStructure\Structural\Collection $collection): void`<br>`getItems(): array` |
-| `Serializable` | interface | — | `serialize(): mixed`<br>`deserialize(mixed $data): void` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `BPlusTreeCollection` | ≤ 2.8.6 | interface | `DataStructure\Behavioral\Sortable`, `DataStructure\Structural\Collection`, `DataStructure\Tree` | `getOrder(): int`<br>`rangeSearch(mixed $start, mixed $end): array`<br>`getMinimum(): mixed`<br>`getMaximum(): mixed`<br>`balance(): void` |
+| `Collection` | ≤ 2.8.6 | interface | `DataStructure\Behavioral\Countable`, `DataStructure\Behavioral\Indexable`, `DataStructure\Behavioral\Modifiable`, `DataStructure\Behavioral\Searchable` | `addAll(DataStructure\Structural\Collection $collection): void`<br>`getItems(): array` |
+| `Serializable` | ≤ 2.8.6 | interface | — | `serialize(): mixed`<br>`deserialize(mixed $data): void` |
 
-**`Environment`** — new in 2.9.0
+**`Environment`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `EnvironmentResolver` | interface | — | `get(string $name): ?string`<br>`has(string $name): bool` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `EnvironmentResolver` | 2.9.0 | interface | — | `get(string $name): ?string`<br>`has(string $name): bool` |
 
 **`Logging`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `LogFormatter` | interface | — | `format(ImmutableValue $record): string`<br>`formatBatch(array $records): string` |
-| `LogHandler` | interface | — | `handle(ImmutableValue $record): void`<br>`isHandling(ImmutableValue $record): bool` |
-| `LogLevel` | interface | — | `getLevel(): string`<br>`getColor(): string`<br>`getValue(): int` |
-| `LogProcessor` | interface | — | `process(ImmutableValue $record): ImmutableValue` |
-| `LogRotator` | interface | — | `shouldRotate(string $filePath): bool`<br>`rotate(string $filename): void` |
-| `Logger` | interface | `Logging\Behavioral\Loggable` | `getName(): string` |
-| `LoggerExtendedInterface` | interface | `Logging\Logger` | `addHandler(Logging\Structural\HandlerAware $handler): self`<br>`addProcessor(Logging\Structural\ProcessorAware $processor): self`<br>`setFormatter(Logging\Structural\FormatterAware $formatter): self`<br>`getName(): string` |
-| `LoggingManager` | interface | `Logging\Behavioral\Configurable`, `Logging\Behavioral\Loggable`, `Logging\Structural\ContextAware`, `Logging\Structural\FormatterAware`, `Logging\Structural\HandlerAware`, `Logging\Structural\ProcessorAware` | `getName(): string` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `LogFormatter` | ≤ 2.8.6 | interface | — | `format(ImmutableValue $record): string`<br>`formatBatch(array $records): string` |
+| `LogHandler` | ≤ 2.8.6 | interface | — | `handle(ImmutableValue $record): void`<br>`isHandling(ImmutableValue $record): bool` |
+| `LogLevel` | ≤ 2.8.6 | interface | — | `getLevel(): string`<br>`getColor(): string`<br>`getValue(): int` |
+| `LogProcessor` | ≤ 2.8.6 | interface | — | `process(ImmutableValue $record): ImmutableValue` |
+| `LogRotator` | ≤ 2.8.6 | interface | — | `shouldRotate(string $filePath): bool`<br>`rotate(string $filename): void` |
+| `Logger` | ≤ 2.8.6 | interface | `Logging\Behavioral\Loggable` | `getName(): string` |
+| `LoggerExtendedInterface` | ≤ 2.8.6 | interface | `Logging\Logger` | `addHandler(Logging\Structural\HandlerAware $handler): self`<br>`addProcessor(Logging\Structural\ProcessorAware $processor): self`<br>`setFormatter(Logging\Structural\FormatterAware $formatter): self`<br>`getName(): string` |
+| `LoggingManager` | ≤ 2.8.6 | interface | `Logging\Behavioral\Configurable`, `Logging\Behavioral\Loggable`, `Logging\Structural\ContextAware`, `Logging\Structural\FormatterAware`, `Logging\Structural\HandlerAware`, `Logging\Structural\ProcessorAware` | `getName(): string` |
 
 **`Logging\Behavioral`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Configurable` | interface | — | `getConfig(): ImmutableValue`<br>`setConfig(ImmutableValue $config): Logging\Behavioral\Configurable` |
-| `Loggable` | interface | — | `log(Logging\LogLevel $level, Stringable|string $message, array $context = []): void`<br>`debug(Stringable|string $message, array $context = []): void`<br>`info(Stringable|string $message, array $context = []): void`<br>`notice(Stringable|string $message, array $context = []): void`<br>`warning(Stringable|string $message, array $context = []): void`<br>`error(Stringable|string $message, array $context = []): void`<br>`critical(Stringable|string $message, array $context = []): void`<br>`alert(Stringable|string $message, array $context = []): void`<br>`emergency(Stringable|string $message, array $context = []): void` |
-| `LoggerConfigurable` | interface | — | `configure(array $config): void` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Configurable` | ≤ 2.8.6 | interface | — | `getConfig(): ImmutableValue`<br>`setConfig(ImmutableValue $config): Logging\Behavioral\Configurable` |
+| `Loggable` | ≤ 2.8.6 | interface | — | `log(Logging\LogLevel $level, Stringable|string $message, array $context = []): void`<br>`debug(Stringable|string $message, array $context = []): void`<br>`info(Stringable|string $message, array $context = []): void`<br>`notice(Stringable|string $message, array $context = []): void`<br>`warning(Stringable|string $message, array $context = []): void`<br>`error(Stringable|string $message, array $context = []): void`<br>`critical(Stringable|string $message, array $context = []): void`<br>`alert(Stringable|string $message, array $context = []): void`<br>`emergency(Stringable|string $message, array $context = []): void` |
+| `LoggerConfigurable` | ≤ 2.8.6 | interface | — | `configure(array $config): void` |
 
 **`Logging\Structural`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `ContextAware` | interface | — | `withContext(array $context): self`<br>`getContext(): array` |
-| `FormatterAware` | interface | — | `setFormatter(ImmutableValue $formatter): Logging\Structural\FormatterAware`<br>`getFormatter(): ImmutableValue` |
-| `HandlerAware` | interface | — | `addHandler(Logging\LogHandler $handler, ?Logging\LogLevel $level = null): Logging\Structural\HandlerAware`<br>`pushHandler(Logging\LogHandler $handler): Logging\Structural\HandlerAware`<br>`popHandler(): ?Logging\LogHandler`<br>`getHandlers(): array` |
-| `LoggerAware` | interface | — | `setLogger(Logging\Logger $logger): void` |
-| `ProcessorAware` | interface | — | `addProcessor(Logging\LogProcessor $processor): Logging\Structural\ProcessorAware`<br>`getProcessors(): array` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `ContextAware` | ≤ 2.8.6 | interface | — | `withContext(array $context): self`<br>`getContext(): array` |
+| `FormatterAware` | ≤ 2.8.6 | interface | — | `setFormatter(ImmutableValue $formatter): Logging\Structural\FormatterAware`<br>`getFormatter(): ImmutableValue` |
+| `HandlerAware` | ≤ 2.8.6 | interface | — | `addHandler(Logging\LogHandler $handler, ?Logging\LogLevel $level = null): Logging\Structural\HandlerAware`<br>`pushHandler(Logging\LogHandler $handler): Logging\Structural\HandlerAware`<br>`popHandler(): ?Logging\LogHandler`<br>`getHandlers(): array` |
+| `LoggerAware` | ≤ 2.8.6 | interface | — | `setLogger(Logging\Logger $logger): void` |
+| `ProcessorAware` | ≤ 2.8.6 | interface | — | `addProcessor(Logging\LogProcessor $processor): Logging\Structural\ProcessorAware`<br>`getProcessors(): array` |
 
 **`Processor`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `ConfigurableProcessor` | interface | `Processor\Processor` | `configure(array $options): void` |
-| `Pipeline` | interface | — | `addProcessor(Processor\Processor $processor): self`<br>`process(mixed $input): mixed` |
-| `ProcessingResult` | interface | — | `addError(string $property, string $errorKey, string $message): void`<br>`setProcessedData(string $property, mixed $value): void`<br>`hasErrors(): bool`<br>`getErrors(): array`<br>`getProcessedData(): array`<br>`toArray(): array`<br>`clear(): void` |
-| `Processor` | interface | — | `process(mixed $input): mixed` |
-| `ProcessorBuilder` | interface | — | `build(string $context, string $name, array $processorConfig = []): Processor\Processor`<br>`buildPipeline(string $context, array $processorSpecs): Processor\Pipeline` |
-| `ProcessorRegistry` | interface | — | `register(string $context, string $name, Processor\Processor $processor): self`<br>`get(string $context, string $name): Processor\Processor`<br>`getContextProcessors(string $context): DataStructure\Map` |
-| `ProcessorValidator` | interface | — | `validate(Processor\Processor $processor, string $processorName, array $messages): ?array` |
-| `ValidatableProcessor` | interface | `Processor\Processor` | `reset(): void`<br>`isValid(): bool`<br>`getErrorKey(): ?string` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `ConfigurableProcessor` | ≤ 2.8.6 | interface | `Processor\Processor` | `configure(array $options): void` |
+| `Pipeline` | ≤ 2.8.6 | interface | — | `addProcessor(Processor\Processor $processor): self`<br>`process(mixed $input): mixed` |
+| `ProcessingResult` | ≤ 2.8.6 | interface | — | `addError(string $property, string $errorKey, string $message): void`<br>`setProcessedData(string $property, mixed $value): void`<br>`hasErrors(): bool`<br>`getErrors(): array`<br>`getProcessedData(): array`<br>`toArray(): array`<br>`clear(): void` |
+| `Processor` | ≤ 2.8.6 | interface | — | `process(mixed $input): mixed` |
+| `ProcessorBuilder` | ≤ 2.8.6 | interface | — | `build(string $context, string $name, array $processorConfig = []): Processor\Processor`<br>`buildPipeline(string $context, array $processorSpecs): Processor\Pipeline` |
+| `ProcessorRegistry` | ≤ 2.8.6 | interface | — | `register(string $context, string $name, Processor\Processor $processor): self`<br>`get(string $context, string $name): Processor\Processor`<br>`getContextProcessors(string $context): DataStructure\Map` |
+| `ProcessorValidator` | ≤ 2.8.6 | interface | — | `validate(Processor\Processor $processor, string $processorName, array $messages): ?array` |
+| `ValidatableProcessor` | ≤ 2.8.6 | interface | `Processor\Processor` | `reset(): void`<br>`isValid(): bool`<br>`getErrorKey(): ?string` |
 
 **`Processor\Attribute`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `BaseProcessorAttribute` | abstract class | `Processor\Attribute\CustomizableMessageAttribute`, `Processor\Attribute\ProcessableAttribute` | `__construct(array $processors, ?array $messages = null)`<br>`getProcessors(): array`<br>`getMessage(string $processorName): ?string` |
-| `CustomizableMessageAttribute` | interface | — | `getMessage(string $validatorName): ?string` |
-| `ProcessableAttribute` | interface | — | `getProcessors(): array` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `BaseProcessorAttribute` | ≤ 2.8.6 | abstract class | `Processor\Attribute\CustomizableMessageAttribute`, `Processor\Attribute\ProcessableAttribute` | `__construct(array $processors, ?array $messages = null)`<br>`getProcessors(): array`<br>`getMessage(string $processorName): ?string` |
+| `CustomizableMessageAttribute` | ≤ 2.8.6 | interface | — | `getMessage(string $validatorName): ?string` |
+| `ProcessableAttribute` | ≤ 2.8.6 | interface | — | `getProcessors(): array` |
 
-**`Resilience`** — new in 2.9.0
+**`Resilience`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `CallNotPermittedException` | interface | `\Throwable` | `?int $retryAfterSeconds { get; }` |
-| `CircuitBreaker` | interface | — | `execute(callable $operation): mixed`<br>`isOpen(): bool` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `CallNotPermittedException` | 2.9.0 | interface | `\Throwable` | `?int $retryAfterSeconds { get; }` |
+| `CallPermit` | 2.10.0 | interface | — | — (marker) |
+| `CircuitBreaker` | 2.9.0 | interface | — | `execute(callable $operation): mixed`<br>`isOpen(): bool` |
+| `ManualCircuitBreaker` | 2.10.0 | interface | `Resilience\CircuitBreaker` | `tryAcquirePermit(): ?Resilience\CallPermit`<br>`acquirePermit(): Resilience\CallPermit`<br>`recordSuccess(Resilience\CallPermit $permit): void`<br>`recordFailure(Resilience\CallPermit $permit, Throwable $error): void`<br>`releasePermit(Resilience\CallPermit $permit): void` |
+| `RateLimitDecision` | 2.10.0 | interface | — | `bool $allowed { get; }`<br>`int $limit { get; }`<br>`int $remaining { get; }`<br>`int $retryAfter { get; }`<br>`int $resetAfter { get; }` |
+| `RateLimiter` | 2.10.0 | interface | — | `attempt(string $key, int $cost = 1): Resilience\RateLimitDecision`<br>`peek(string $key): Resilience\RateLimitDecision`<br>`reset(string $key): void` |
+| `RetryPolicy` | 2.10.0 | interface | — | `shouldRetry(Throwable $error, int $attempt): bool`<br>`delayMilliseconds(Throwable $error, int $attempt): int` |
 
 **`Sanitizer`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Sanitizer` | interface | — | `sanitize(mixed $input): mixed` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Sanitizer` | ≤ 2.8.6 | interface | — | `sanitize(mixed $input): mixed` |
 
 **`Serializer`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Serializer` | interface | — | `serialize(mixed $input): string`<br>`deserialize(string $data): mixed` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Serializer` | ≤ 2.8.6 | interface | — | `serialize(mixed $input): string`<br>`deserialize(string $data): mixed` |
 
 **`Transformer`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Transformer` | interface | — | `transform(mixed $object): mixed` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Transformer` | ≤ 2.8.6 | interface | — | `transform(mixed $object): mixed` |
 
 **`Validator`**
 
-| Type | Kind | Extends / implements | Members |
-|---|---|---|---|
-| `Validator` | interface | — | `validate(mixed $input): mixed` |
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Validator` | ≤ 2.8.6 | interface | — | `validate(mixed $input): mixed` |
 
 ## 4. Compatibility Promise
 
@@ -272,6 +344,9 @@ parents only.
   (type, hooks, asymmetric visibility, default) and methods (visibility,
   modifiers, return type, and each parameter's name, type, default,
   variadic, by-reference and promoted flags). Docblocks are not recorded.
+- **2.9.0 snapshot.** `tests/Compatibility/fixtures/2.9.0.json` was
+  captured the same way from the 2.9.0 release tarball (SHA-256
+  `86b11923…`) before 2.10.0 changed anything: 59 types.
 - **Rule.** Every snapshot type must exist with an identical record. A
   removal, a change or an addition inside an inherited type fails, because a
   new method, parameter or parent interface breaks implementers. New types
@@ -290,9 +365,10 @@ parents only.
   (ADR-003). The three ADR-007 contracts were renamed before their first
   publication and keep their method signatures exactly; no suffixed alias
   exists, because nothing can depend on a name never published.
-- A parameterless accessor is an interface property `{ get; }`. The only one
-  in the new contracts is `CallNotPermittedException::$retryAfterSeconds`,
-  and a `readonly` property satisfies it (§9).
+- A parameterless accessor is an interface property `{ get; }`:
+  `CallNotPermittedException::$retryAfterSeconds` (2.9.0) and the five
+  properties of `RateLimitDecision` (2.10.0). A `readonly` property satisfies
+  them (§9).
 - None of the ADR-007 contracts declares a `get*` method without
   parameters. `namespace()`, `defaults()` and `schema()` are parameterless
   named queries and keep the signatures every Configurator provider
@@ -314,9 +390,9 @@ parents only.
 | Suite | Directory | Result (local) | What it proves |
 |---|---|---|---|
 | `inherited` | `tests/DI`, `DataStructure`, `Logging`, `Processor`, `Sanitizer`, `Serializer`, `Transformer`, `Validator` | 160 tests, 393 assertions | the 2.8.6 tests run unchanged on PHPUnit 11.5 |
-| `unit` | `tests/Unit` | 21 tests, 65 assertions | a minimal implementation of each new interface behaves as §2 states |
-| `compatibility` | `tests/Compatibility` | 3 tests, 17 assertions | every 2.8.6 type keeps its API; the comparison detects differences |
-| `conformance` | `tests/Conformance` | 11 tests, 25 assertions | the Spec V4.0 rules of §10 over the whole `src/` tree |
+| `unit` | `tests/Unit` | 39 tests, 3,337 assertions | a minimal implementation of each contract added since 2.9.0 behaves as §2 states; most assertions come from sampling retry delays |
+| `compatibility` | `tests/Compatibility` | 5 tests, 28 assertions | every 2.8.6 and 2.9.0 type keeps its API; the comparison detects differences |
+| `conformance` | `tests/Conformance` | 13 tests, 37 assertions | the Spec V4.0 rules of §10 over the whole `src/` tree, the E-005 criteria and synchronous signatures of the 2.10.0 ports |
 
 ## 8. Consumer Migration
 
@@ -372,6 +448,17 @@ the literal copy (SHA-256 of `CircuitBreaker.php`
 `1981562bad954f20516b02517b8bc56ea5514686a2d6dd748658cd28d76674d1`, of
 `CallNotPermittedException.php`
 `44dac7fdefc4996cff9a81f64e3a49c7e2de17859b7fc78e574df4ac5c92892e`).
+
+### 8.4 Resilience ports (2.10.0)
+
+| Package | Today | With 2.10.0 | Change |
+|---|---|---|---|
+| circuit-breaker 4.0.0 | implements `CircuitBreaker`; manual permits only on `Core\CircuitBreaker` | implements `ManualCircuitBreaker` | add `tryAcquirePermit()` (null where `acquirePermit()` throws `CircuitOpenException`); add `releasePermit()` (frees a half-open trial of the same epoch, no-op otherwise); `Core\CallPermit implements Contract\Resilience\CallPermit`; type `recordSuccess()` / `recordFailure()` against the contract's `CallPermit`, keeping the 7130 check; require `^2.10`; drop `kariricode-contract-resilience/` |
+| rate-limiter 4.0.0 | autoloads `KaririCode\Contract\Resilience\` from `contract-proposal/` | implements `RateLimiter` from the contract | delete `contract-proposal/` and its autoload entry; require `^2.10` (its README says `^2.9`, which lacks these types) |
+| Observability | `CircuitBreakingExporter(?object)` + `execute()`; `RateLimitedLogger(?object)`; retry loop in `AsyncBatchExporter` | `?CircuitBreaker`, `?RateLimiter`, optional `RetryPolicy` | type the parameters; `->attempt($key)->allowed`; keep the built-in fallbacks for null; build the limiter with rate-limiter 4.0.0 (`TokenBucket(maxTokens, refillRate)` no longer exists) |
+| DataFlow | `RateLimiterBridge(object)` + `method_exists('attempt')`, `isAllowed()` / `getRetryAfter()` or a bool; `CircuitBreakerBridge(object)`; `Resilience\RetryStrategy` | `RateLimiter`; `ManualCircuitBreaker` for asynchronous stages; `RetryPolicy` | read `$decision->allowed` and `$decision->retryAfter`; asynchronous stages use `acquirePermit()` and map `CallNotPermittedException` (7100–7102); make `RetryStrategy` take or implement a `RetryPolicy` |
+| Authenticator | bridge `check($bucket, $max, $window)`, `recordFailure($bucket)` | `RateLimiter` | one limiter per policy, built with `Quota::of($max, $window)` (e.g. `SlidingWindowLog`); `check` → `peek($bucket)->allowed`; `recordFailure` → `attempt($bucket)`; optionally `reset($bucket)` on success |
+| processor-pipeline | no resilience decorators | `ManualCircuitBreaker`, `RateLimiter`, `RetryPolicy` | decorators typed against the ports; `"kariricode/contract": "^2.10"` |
 
 ## 9. Errata E-013 (proposed)
 
@@ -434,7 +521,10 @@ renumbering.
 | Additive minor release | 2.8.6 API unchanged | `BackwardCompatibilityTest` |
 | E-003 backed enums | no enum is declared | not applicable |
 | E-006 measured claims only | README metrics measured; QD stays PENDING | `docs/quality/QD-V40-COMPLIANCE.md` |
-| Static analysis | PHPStan max and Psalm 2: 0 errors in new code; inherited findings in baselines | `staticAnalysisBaselinesCoverInheritedFilesOnly` |
+| Static analysis | PHPStan max and Psalm 2: 0 errors in new code; inherited findings in baselines. Psalm 1 (strict, no baseline) over the source added since 2.9.0: 0 errors | `staticAnalysisBaselinesCoverInheritedFilesOnly`, `composer psalm-strict` |
+| E-005 documentation of the 2.10.0 ports | preconditions, thread-safety, example and references in each docblock | `theResiliencePortsDocumentTheFiveCriteria` |
+| Level 1: nothing asynchronous | no promise, fiber or generator in the ports' signatures | `theResiliencePortsAreSynchronousInterfaces` |
+| Additive over 2.9.0 | 2.9.0 API unchanged | `BackwardCompatibilityTest` (2.9.0 snapshot) |
 
 ## 11. Inherited Deviations (3.0.0)
 
@@ -488,6 +578,12 @@ Other findings, outside the automated rules:
   fixture from the 2.8.6 dist.
 - Line coverage was not measured; the only executable code in `src/` is the
   inherited `BaseProcessorAttribute`.
+- `RetryPolicy` has no implementation yet; its semantics rest on the test
+  fixture `FullJitterBackoff`. `ManualCircuitBreaker` and `CallPermit` need
+  the circuit-breaker changes of §8.4 before a library implements them.
+- The line numbers of the libraries' own APIs could not be checked: their
+  release tarballs were not available when 2.10.0 was written (ADR-004 cites
+  their design records).
 
 ## 13. References
 
@@ -503,3 +599,7 @@ Other findings, outside the automated rules:
 - KaririCode Configurator, ADR-007; `kariricode/circuit-breaker` 4.0.0,
   ADR-003 and SPEC-001; KaririCode Code Quality Directive V4.0 and
   Spec V4.3.3 errata E-040.
+- Resilience4j documentation: "CircuitBreaker", "RateLimiter", "Retry".
+- Brooker, M. (2015). "Exponential Backoff And Jitter". AWS Architecture Blog.
+- Fowler, M. (2014). *CircuitBreaker*. martinfowler.com/bliki/CircuitBreaker.html
+- `kariricode/rate-limiter` 4.0.0, SPEC-001 §3; ADR-004 of this package.

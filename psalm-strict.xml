@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- Error level 1 (strict), no baseline: the source added since 2.9.0. psalm.xml covers the whole tree at level 2. -->
+<psalm
+    errorLevel="1"
+    findUnusedCode="false"
+    resolveFromConfigFile="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <projectFiles>
+        <directory name="src/Configuration"/>
+        <directory name="src/Environment"/>
+        <directory name="src/Resilience"/>
+    </projectFiles>
+</psalm>

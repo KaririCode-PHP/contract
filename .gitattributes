@@ -4,4 +4,5 @@
 /.php-cs-fixer.dist.php export-ignore
 /phpstan.neon           export-ignore
 /psalm.xml              export-ignore
+/psalm-strict.xml       export-ignore
 /phpunit.xml.dist       export-ignore

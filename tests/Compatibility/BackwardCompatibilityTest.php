@@ -4,48 +4,65 @@ declare(strict_types=1);
 
 namespace KaririCode\Contract\Tests\Compatibility;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Proves that 2.9.0 is additive: every type of the 2.8.6 snapshot still
- * exists with exactly the same public API.
+ * Proves that every release is additive: every type of the 2.8.6 and 2.9.0
+ * snapshots still exists with exactly the same public API.
  *
  * Inherited types are frozen as a whole. A new method, parameter or parent
  * interface on an inherited interface would break its implementers, so it
  * is reported like any other difference; additions are new types only.
  *
- * The fixture was captured by Reflection from the untouched 2.8.6 dist with
- * dump-api.php, before any change; docblocks are not part of it.
+ * Each fixture was captured by Reflection with dump-api.php before the next
+ * release changed anything: 2.8.6 from the untouched Packagist dist, 2.9.0
+ * from its release tarball. Docblocks are not part of them.
  */
 final class BackwardCompatibilityTest extends TestCase
 {
-    private const string FIXTURE = __DIR__ . '/fixtures/2.8.6.json';
+    private const array RELEASES = [
+        '2.8.6' => ['reference' => '35935418be93009a1ce389460e6fbf87353f0dd7', 'types' => 54],
+        '2.9.0' => ['reference' => 'sha256:86b11923ea913650a8c4a3e877be4c734057ace9b40d0e434ba985f1b2946217', 'types' => 59],
+    ];
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function releases(): iterable
+    {
+        foreach (array_keys(self::RELEASES) as $version) {
+            yield $version => [$version];
+        }
+    }
 
     #[Test]
-    public function everyInheritedTypeKeepsItsPublicApi(): void
+    #[DataProvider('releases')]
+    public function everyTypeOfThePreviousReleaseKeepsItsPublicApi(string $version): void
     {
-        $differences = self::differences(self::baseline(), self::currentTypes());
+        $differences = self::differences(self::baseline($version), self::currentTypes());
 
         self::assertSame([], $differences, implode("\n", $differences));
     }
 
     #[Test]
-    public function theFixtureIsTheSnapshotOfTheTaggedRelease(): void
+    #[DataProvider('releases')]
+    public function theFixtureIsTheSnapshotOfItsRelease(string $version): void
     {
-        $fixture = self::fixture();
+        $fixture = self::fixture($version);
 
         self::assertSame('kariricode/contract', $fixture['package']);
-        self::assertSame('2.8.6', $fixture['version']);
-        self::assertSame('35935418be93009a1ce389460e6fbf87353f0dd7', $fixture['reference']);
+        self::assertSame($version, $fixture['version']);
+        self::assertSame(self::RELEASES[$version]['reference'], $fixture['reference']);
         self::assertIsArray($fixture['types']);
-        self::assertCount(54, $fixture['types']);
+        self::assertCount(self::RELEASES[$version]['types'], $fixture['types']);
     }
 
     #[Test]
     public function anyDifferenceInAnInheritedTypeIsReported(): void
     {
-        $baseline = self::baseline();
+        $baseline = self::baseline('2.8.6');
         self::assertIsArray($baseline['KaririCode\\Contract\\Processor\\Processor']);
         self::assertIsArray($baseline['KaririCode\\Contract\\DI\\Container']);
 
@@ -122,9 +139,9 @@ final class BackwardCompatibilityTest extends TestCase
     /**
      * @return array<string, mixed>
      */
-    private static function baseline(): array
+    private static function baseline(string $version): array
     {
-        $types = self::fixture()['types'];
+        $types = self::fixture($version)['types'];
         self::assertIsArray($types);
 
         return $types;
@@ -133,9 +150,9 @@ final class BackwardCompatibilityTest extends TestCase
     /**
      * @return array<string, mixed>
      */
-    private static function fixture(): array
+    private static function fixture(string $version): array
     {
-        $json = file_get_contents(self::FIXTURE);
+        $json = file_get_contents(__DIR__ . '/fixtures/' . $version . '.json');
         self::assertIsString($json);
 
         $fixture = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
