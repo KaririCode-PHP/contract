@@ -13,9 +13,6 @@ namespace KaririCode\Contract\Processor;
  *
  * @category  ProcessorPipeline
  *
- * @author    [Your Name] <your.email@example.com>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface ProcessorBuilder

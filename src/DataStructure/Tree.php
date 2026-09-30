@@ -14,9 +14,6 @@ use KaririCode\Contract\DataStructure\Behavioral\Searchable;
  *
  * @category  DataStructure
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Tree extends Modifiable, Searchable

@@ -16,9 +16,6 @@ use KaririCode\Contract\DataStructure\Behavioral\Searchable;
  *
  * @category  DataStructure\Structural
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Collection extends Countable, Indexable, Modifiable, Searchable

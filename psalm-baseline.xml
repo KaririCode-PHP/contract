@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.19.1@e2ca44251c1f1aa2e35452d426895746b47de64e">
+  <file src="src/DataStructure/Behavioral/IterableCollection.php">
+    <MissingTemplateParam>
+      <code><![CDATA[\Traversable]]></code>
+    </MissingTemplateParam>
+  </file>
+  <file src="src/DataStructure/Set.php">
+    <TooManyTemplateParams>
+      <code><![CDATA[Modifiable]]></code>
+      <code><![CDATA[Searchable]]></code>
+    </TooManyTemplateParams>
+  </file>
+  <file src="src/Logging/LogProcessor.php">
+    <MismatchingDocblockParamType>
+      <code><![CDATA[array]]></code>
+    </MismatchingDocblockParamType>
+    <MismatchingDocblockReturnType>
+      <code><![CDATA[array]]></code>
+    </MismatchingDocblockReturnType>
+  </file>
+  <file src="src/Logging/LoggerExtended.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function getName(): string;]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="src/Processor/Attribute/BaseProcessorAttribute.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function getMessage(string $processorName): ?string]]></code>
+      <code><![CDATA[public function getProcessors(): array]]></code>
+    </MissingOverrideAttribute>
+    <ParamNameMismatch>
+      <code><![CDATA[$processorName]]></code>
+    </ParamNameMismatch>
+  </file>
+  <file src="src/Processor/ProcessorRegistry.php">
+    <UndefinedDocblockClass>
+      <code><![CDATA[HashMap]]></code>
+    </UndefinedDocblockClass>
+  </file>
+</files>

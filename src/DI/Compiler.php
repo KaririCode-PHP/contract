@@ -10,8 +10,6 @@ namespace KaririCode\Contract\DI;
  * Defines the contract for compiling container definitions and handling caching mechanisms.
  *
  * @category  DependencyInjection
- *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
  */
 interface Compiler
 {

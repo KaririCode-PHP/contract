@@ -1,0 +1,277 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Container\:\:bind\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Container.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Container\:\:call\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Container.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Container\:\:factory\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Container.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Container\:\:singleton\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Container.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Container\:\:tag\(\) has parameter \$abstracts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Container.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Container\:\:tagged\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Container.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Definition\:\:getParameters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Definition.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DI\\Definition\:\:getTags\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DI/Definition.php
+
+		-
+			message: '#^Interface KaririCode\\Contract\\DataStructure\\Behavioral\\IterableCollection extends generic interface Traversable but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/DataStructure/Behavioral/IterableCollection.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DataStructure\\Map\:\:keys\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataStructure/Map.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DataStructure\\Map\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataStructure/Map.php
+
+		-
+			message: '#^PHPDoc tag @extends contains generic type KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable\<mixed\> but interface KaririCode\\Contract\\DataStructure\\Behavioral\\Modifiable is not generic\.$#'
+			identifier: generics.notGeneric
+			count: 1
+			path: src/DataStructure/Set.php
+
+		-
+			message: '#^PHPDoc tag @extends contains generic type KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable\<mixed\> but interface KaririCode\\Contract\\DataStructure\\Behavioral\\Searchable is not generic\.$#'
+			identifier: generics.notGeneric
+			count: 1
+			path: src/DataStructure/Set.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DataStructure\\Structural\\BPlusTreeCollection\:\:rangeSearch\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataStructure/Structural/BPlusTreeCollection.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\DataStructure\\Structural\\Collection\:\:getItems\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataStructure/Structural/Collection.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:alert\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:critical\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:debug\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:emergency\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:error\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:info\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:log\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:notice\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\Loggable\:\:warning\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/Loggable.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Behavioral\\LoggerConfigurable\:\:configure\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Behavioral/LoggerConfigurable.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$record with type array is incompatible with native type KaririCode\\Contract\\ImmutableValue\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Logging/LogProcessor.php
+
+		-
+			message: '#^PHPDoc tag @return with type array is incompatible with native type KaririCode\\Contract\\ImmutableValue\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/Logging/LogProcessor.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Structural\\ContextAware\:\:getContext\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Structural/ContextAware.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Logging\\Structural\\ContextAware\:\:withContext\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Logging/Structural/ContextAware.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:__construct\(\) has parameter \$messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:__construct\(\) has parameter \$processors with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:filterValidProcessors\(\) has parameter \$processors with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:filterValidProcessors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:getMessage\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:getProcessors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Property KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:\$messages type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Property KaririCode\\Contract\\Processor\\Attribute\\BaseProcessorAttribute\:\:\$processors type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/BaseProcessorAttribute.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\Attribute\\ProcessableAttribute\:\:getProcessors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/Attribute/ProcessableAttribute.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\ConfigurableProcessor\:\:configure\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/ConfigurableProcessor.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\ProcessorBuilder\:\:build\(\) has parameter \$processorConfig with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/ProcessorBuilder.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\ProcessorBuilder\:\:buildPipeline\(\) has parameter \$processorSpecs with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/ProcessorBuilder.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\ProcessorRegistry\:\:getContextProcessors\(\) has invalid return type KaririCode\\Contract\\Processor\\HashMap\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Processor/ProcessorRegistry.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\ProcessorRegistry\:\:getContextProcessors\(\) return type has no value type specified in iterable type KaririCode\\Contract\\DataStructure\\Map\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/ProcessorRegistry.php
+
+		-
+			message: '#^PHPDoc tag @return with type KaririCode\\Contract\\Processor\\HashMap is not subtype of native type KaririCode\\Contract\\DataStructure\\Map\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/Processor/ProcessorRegistry.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\ProcessorValidator\:\:validate\(\) has parameter \$messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/ProcessorValidator.php
+
+		-
+			message: '#^Method KaririCode\\Contract\\Processor\\ProcessorValidator\:\:validate\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Processor/ProcessorValidator.php

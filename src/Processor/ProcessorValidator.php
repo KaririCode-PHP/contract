@@ -17,9 +17,6 @@ namespace KaririCode\Contract\Processor;
  *
  * @category  ProcessorPipeline
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface ProcessorValidator

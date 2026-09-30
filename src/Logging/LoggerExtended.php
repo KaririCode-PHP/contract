@@ -13,9 +13,6 @@ use KaririCode\Contract\Logging\Structural\ProcessorAware;
  *
  * @category  Logging
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface LoggerExtendedInterface extends Logger

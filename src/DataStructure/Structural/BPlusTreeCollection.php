@@ -14,9 +14,6 @@ use KaririCode\Contract\DataStructure\Tree;
  *
  * @category  DataStructure\Structural
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface BPlusTreeCollection extends Collection, Tree, Sortable

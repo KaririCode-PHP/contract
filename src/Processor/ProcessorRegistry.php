@@ -15,9 +15,6 @@ use KaririCode\Contract\DataStructure\Map;
  *
  * @category  ProcessorPipeline
  *
- * @license   MIT
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- *
  * @see       https://kariricode.org/
  */
 interface ProcessorRegistry

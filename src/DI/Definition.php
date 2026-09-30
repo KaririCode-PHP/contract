@@ -10,8 +10,6 @@ namespace KaririCode\Contract\DI;
  * Defines the contract for service definitions managed by the dependency injection container.
  *
  * @category  DependencyInjection
- *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
  */
 interface Definition
 {

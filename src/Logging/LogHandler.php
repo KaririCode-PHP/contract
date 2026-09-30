@@ -19,8 +19,6 @@ use KaririCode\Contract\ImmutableValue;
  *
  * @category  Logging
  *
- * @license   MIT License
- *
  * @see      https://kariricode.org/
  */
 interface LogHandler

@@ -11,9 +11,6 @@ namespace KaririCode\Contract\Transformer;
  *
  * @category  Transformer
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Transformer

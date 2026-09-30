@@ -10,8 +10,6 @@ namespace KaririCode\Contract\DI;
  * Defines the contract for service providers responsible for registering and bootstrapping services.
  *
  * @category  DependencyInjection
- *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
  */
 interface Provider
 {

@@ -11,9 +11,6 @@ namespace KaririCode\Contract\DataStructure\Structural;
  *
  * @category  Interfaces
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Serializable

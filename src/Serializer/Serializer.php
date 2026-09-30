@@ -11,9 +11,6 @@ namespace KaririCode\Contract\Serializer;
  *
  * @category  Serializer
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Serializer

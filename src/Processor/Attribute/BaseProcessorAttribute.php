@@ -13,8 +13,6 @@ namespace KaririCode\Contract\Processor\Attribute;
  * suportam personalização de mensagens.
  *
  * @category  Processor
- *
- * @license   MIT
  */
 abstract class BaseProcessorAttribute implements ProcessableAttribute, CustomizableMessageAttribute
 {

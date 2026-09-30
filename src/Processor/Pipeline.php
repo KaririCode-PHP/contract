@@ -11,9 +11,6 @@ namespace KaririCode\Contract\Processor;
  *
  * @category  Processor
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Pipeline

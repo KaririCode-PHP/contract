@@ -1,7 +1,9 @@
+includes:
+    - phpstan-baseline.neon
+
 parameters:
     level: max
+    phpVersion: 80400
     paths:
         - src
-        - tests
-    ignoreErrors:
-        - '#Method .* has parameter \$.* with no value type specified in iterable type array.#'    
+    treatPhpDocTypesAsCertain: false

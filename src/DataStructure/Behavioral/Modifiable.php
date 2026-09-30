@@ -11,9 +11,6 @@ namespace KaririCode\Contract\DataStructure\Behavioral;
  *
  * @category  DataStructure\Behavioral
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Modifiable

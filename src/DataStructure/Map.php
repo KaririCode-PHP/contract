@@ -14,9 +14,6 @@ use KaririCode\Contract\DataStructure\Behavioral\IterableCollection;
  *
  * @category  DataStructure
  *
- * @author    Walmir Silva <walmir.silva@kariricode.org>
- * @license   MIT
- *
  * @see       https://kariricode.org/
  */
 interface Map extends Countable, IterableCollection
