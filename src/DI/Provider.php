@@ -10,6 +10,8 @@ namespace KaririCode\Contract\DI;
  * Defines the contract for service providers responsible for registering and bootstrapping services.
  *
  * @category  DependencyInjection
+ *
+ * @deprecated 2.11.0 Removed in 3.0.0; use ServiceProvider with BindableContainer (ADR-005).
  */
 interface Provider
 {

@@ -10,6 +10,8 @@ namespace KaririCode\Contract\DI;
  * Defines the contract for service definitions managed by the dependency injection container.
  *
  * @category  DependencyInjection
+ *
+ * @deprecated 2.11.0 Removed in 3.0.0 without replacement: binding definitions are internal to the container (ADR-005).
  */
 interface Definition
 {

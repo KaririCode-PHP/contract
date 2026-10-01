@@ -1,0 +1,64 @@
+# Quality gates of QD-V40-COMPLIANCE §1 (Spec V4.3.3 §29, §32). Actions are
+# pinned by commit SHA; the comment after each pin is the release it resolves to.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: Gates (PHP 8.4)
+    runs-on: ubuntu-24.04
+    env:
+      COMPOSER_ROOT_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || 'dev-main' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
+      - name: Validate composer.json and the committed lock file
+        run: composer validate --strict
+
+      - name: Install the locked toolchain
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Style, PHPStan max, Psalm (level 2 and strict), all test suites
+        run: composer check
+
+      - name: Known vulnerabilities in the locked toolchain
+        run: composer security
+
+      - name: SBOM (CycloneDX 1.5)
+        run: composer sbom
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sbom
+          path: sbom.cdx.json
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0

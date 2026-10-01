@@ -3,6 +3,40 @@
 All notable changes to `kariricode/contract` are documented here.
 The format follows Keep a Changelog; versions follow Semantic Versioning.
 
+## [2.11.0] — 2026-10-01
+
+Additive release (ADR-005, ADR-006). **There is no breaking change:**
+`BackwardCompatibilityTest` checks the 2.8.6, 2.9.0 and 2.10.0 APIs, and
+accepts an added supertype only when it brings no member.
+
+### Added
+
+- `Exception\ExceptionInterface` (root, E-035) and six member-free families:
+  `Validation`, `NotFound`, `Configuration`, `Protocol`, `ContainerFailure`,
+  `Runtime`.
+- `DI\ServiceProvider` and `DI\BindableContainer`, with the signatures of
+  `KaririCode\Framework\Contract`.
+- `Security\Identity`, with the signatures of the Authenticator's contract.
+- `Context\ContextStorage`: per-request slots keyed by type.
+- `SerializableData` (errata E-001).
+- Supply chain: committed `composer.lock`, `composer security`
+  (`composer audit --locked`), `composer sbom` (`tools/sbom.php`,
+  CycloneDX 1.5), and `.github/workflows/ci.yml` with actions pinned by SHA.
+- Unit fixtures for every family; conformance checks for the exception
+  markers, the E-035 carve-out and the DI deprecations.
+
+### Changed
+
+- `Resilience\CallNotPermittedException` extends `Exception\Runtime`; its
+  docblock follows criteria C1–C5.
+- `psalm-strict.xml` covers the new namespaces; the coding standard covers
+  the new files in `src/DI` and `tools/`.
+
+### Deprecated
+
+- `DI\Provider`, `DI\Container`, `DI\Definition` and `DI\Compiler`, for
+  removal in 3.0.0. Use `DI\ServiceProvider` with `DI\BindableContainer`.
+
 ## [2.10.1] — 2026-10-01
 
 Documentation and conformance only. **The API is unchanged**;

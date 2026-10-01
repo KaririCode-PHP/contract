@@ -10,6 +10,8 @@ namespace KaririCode\Contract\DI;
  * Defines the contract for compiling container definitions and handling caching mechanisms.
  *
  * @category  DependencyInjection
+ *
+ * @deprecated 2.11.0 Removed in 3.0.0 without replacement: compilation is internal to the container (ADR-005).
  */
 interface Compiler
 {

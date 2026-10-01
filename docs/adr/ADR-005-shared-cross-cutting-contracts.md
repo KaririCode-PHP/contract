@@ -1,6 +1,6 @@
 # ADR-005: Shared cross-cutting contracts
 
-- **Status:** Proposed (target: 2.11.0)
+- **Status:** Accepted (2.11.0); open points decided 2026-10-01
 - **Date:** 2026-10-01
 - **Component:** kariricode/contract
 - **Authors:** Walmir Silva <walmir.silva@kariricode.org>
@@ -201,15 +201,29 @@ amended to accept a Spec mandate as a reason to enter, still with an ADR.
 - Components migrate one at a time; until then two provider contracts
   coexist.
 
-## Open Points
+## Decisions on the Open Points (2026-10-01)
 
-1. Namespaces `Security` (Identity) and `Context` (ContextStorage).
-2. Whether `CallNotPermittedException` (2.9.0) should also extend
-   `Exception\Runtime`. Adding a parent without members breaks no
-   implementer or consumer, but the compatibility test must then accept
-   added parents.
-3. Whether to deprecate the inherited DI interfaces in 2.11.0 or leave them
-   untouched until 3.0.0.
+1. **Namespaces `Security` and `Context`.** Java (`java.security.Principal`),
+   .NET (`System.Security.Principal.IIdentity`) and Symfony keep the
+   principal under security, and the namespace gives future authorization
+   contracts the same home. `Context` is OpenTelemetry's name for the
+   concept and follows the package's own pattern
+   (`Environment\EnvironmentResolver`); `Runtime` was rejected because it
+   collides with `Exception\Runtime` and with the kariricode/runtime
+   component.
+2. **`CallNotPermittedException` extends `Exception\Runtime`.** The package
+   that defines the hierarchy cannot ship an exception outside it (§8.4),
+   and a rejected call is a runtime condition the edge answers with 503. The
+   marker brings no member, so no implementer changes. The compatibility
+   test accepts an added supertype only when it brings no method or property
+   the type did not already have.
+3. **Deprecation in 2.11.0.** `DI\Provider`, `DI\Container`,
+   `DI\Definition` and `DI\Compiler` carry `@deprecated 2.11.0 … Removed in
+   3.0.0`. Semantic Versioning asks for at least one minor release with the
+   deprecation before the major release that removes the feature, and the
+   replacement ships in the same release. PHP 8.4's `#[\Deprecated]`
+   attribute does not apply to interfaces, so the notice is a docblock tag
+   that static analysers report.
 
 ## ARFA 1.3
 
@@ -230,3 +244,4 @@ amended to accept a Spec mandate as a reason to enter, still with an ADR.
 - Martin, R. C. (2017). *Clean Architecture*, ch. 10 (Interface Segregation).
 - Design records of kariricode/framework, dependency-injection,
   authenticator, observability and tenancy.
+- Semantic Versioning 2.0.0, FAQ "How should I handle deprecating functionality?".

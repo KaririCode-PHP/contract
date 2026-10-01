@@ -31,14 +31,16 @@ The package follows four rules:
 
 2.9.0 added the circuit breaker contract of `kariricode/circuit-breaker`
 4.0.0 and the environment and configuration contracts of Configurator
-ADR-007. 2.10.0 adds the resilience ports a processor pipeline composes:
+ADR-007. 2.10.0 added the resilience ports a processor pipeline composes:
 rate limiting (`kariricode/rate-limiter` 4.0.0), the manual permit protocol
-of the circuit breaker, and retry policies (ADR-004).
+of the circuit breaker, and retry policies (ADR-004). 2.11.0 adds the
+cross-cutting contracts the Spec requires (ADR-005) and a verifiable supply
+chain (ADR-006).
 
 ## Installation
 
 ```bash
-composer require kariricode/contract:^2.10
+composer require kariricode/contract:^2.11
 ```
 
 Since 2.9.0 the package requires PHP 8.4 or newer, because interfaces
@@ -79,7 +81,7 @@ final readonly class ExchangeRates
 | Interface | Members | Implemented by |
 |---|---|---|
 | `Resilience\CircuitBreaker` (2.9.0) | `execute(callable $operation): mixed`, `isOpen(): bool` | `kariricode/circuit-breaker` 4.0.0 |
-| `Resilience\CallNotPermittedException` (2.9.0) | extends `Throwable`; `?int $retryAfterSeconds { get; }` | circuit-breaker's `CircuitOpenException` |
+| `Resilience\CallNotPermittedException` (2.9.0) | extends `Exception\Runtime` since 2.11.0; `?int $retryAfterSeconds { get; }` | circuit-breaker's `CircuitOpenException` |
 | `Resilience\ManualCircuitBreaker` (2.10.0) | extends `CircuitBreaker`; `tryAcquirePermit(): ?CallPermit`, `acquirePermit(): CallPermit`, `recordSuccess(CallPermit)`, `recordFailure(CallPermit, Throwable)`, `releasePermit(CallPermit)` | circuit-breaker 4.0.0, after the changes in SPEC-001 §8.4 |
 | `Resilience\CallPermit` (2.10.0) | none: opaque proof of one admitted call | circuit-breaker's `Core\CallPermit` |
 | `Resilience\RateLimiter` (2.10.0) | `attempt(string $key, int $cost = 1)`, `peek(string $key)`, `reset(string $key)` | `kariricode/rate-limiter` 4.0.0 |
@@ -144,7 +146,9 @@ Requests`, both with `Retry-After` (RFC 9110, RFC 6585):
 }
 ```
 
-## Environment
+## Environment and Configuration
+
+### Environment
 
 `Environment\EnvironmentResolver` reads environment variables without
 touching `$_ENV`, `$_SERVER` or `getenv()`: `get(string $name): ?string`
@@ -171,7 +175,7 @@ final readonly class DatabaseSettings
 }
 ```
 
-## Configuration
+### Configuration
 
 `Configuration\ValueProcessor` transforms configuration values while they
 load: `supports(mixed $value): bool` decides, `process(mixed $value): mixed`
@@ -213,12 +217,45 @@ final readonly class QueueConfigProvider implements ConfigProvider
 }
 ```
 
+## Cross-cutting Contracts
+
+Five families added in 2.11.0 (ADR-005), required by Spec V4.3.3 §8.4, §9,
+§12 and §31.
+
+| Interface | Role |
+|---|---|
+| `Exception\ExceptionInterface` + `Validation`, `NotFound`, `Protocol`, `Configuration`, `ContainerFailure`, `Runtime` | every component exception implements one family; markers without members |
+| `DI\ServiceProvider`, `DI\BindableContainer` | two-phase provider: `register()` binds, `boot()` resolves |
+| `Security\Identity` | the authenticated principal: `subject`, `roles`, `scopes`, `claims`; an anonymous caller is an `Identity`, never null |
+| `Context\ContextStorage` | per request, coroutine or fiber; slots keyed by type; the runtime clears them |
+| `SerializableData` | marker: public readonly properties are the JSON form (E-001) |
+
+An edge maps the families without knowing the component (RFC 9110):
+
+| Family | HTTP |
+|---|---|
+| `Validation` | 422 |
+| `NotFound` | 404 |
+| `Protocol` | 400 |
+| `Configuration`, `ContainerFailure` | 500 |
+| `Runtime` | 503 with `Retry-After` when the delay is known (an open circuit), 500 otherwise |
+
+```php
+$context->store(Identity::class, $identity);    // authenticator
+$identity = $context->find(Identity::class);     // any component that decides
+$context->clear();                               // runtime, end of request
+```
+
 ## Inherited Contracts
 
 The 54 types of 2.8.6, the five added in 2.9.0 and the five added in 2.10.0
 keep their names, namespaces and signatures. `tests/Compatibility` compares
 them with Reflection snapshots of the 2.8.6 dist and of the 2.9.0 and
-2.10.0 releases; any difference in an earlier type fails.
+2.10.0 releases; any difference in an earlier type fails. A type may gain a supertype only when
+the supertype brings no member (`CallNotPermittedException` gained
+`Exception\Runtime` that way). Since 2.11.0, `DI\Provider`,
+`DI\Container`, `DI\Definition` and `DI\Compiler` are deprecated, for
+removal in 3.0.0; use `DI\ServiceProvider` with `DI\BindableContainer`.
 
 | Namespace | Purpose |
 |---|---|
@@ -240,17 +277,19 @@ it (the case since 2.8.6). Do not type against it.
 
 ## All Contracts
 
-64 types in 17 namespaces; the full signatures are in SPEC-001 §3.
+76 types in 20 namespaces; the full signatures are in SPEC-001 §3.
 
 | Namespace | Types | Since |
 |---|---|---|
-| `(root)` | `ImmutableValue` | ≤ 2.8.6 |
+| `(root)` | `ImmutableValue` (≤ 2.8.6), `SerializableData` (2.11.0) | ≤ 2.8.6, 2.11.0 |
 | `Configuration` | `ConfigProvider`, `ValueProcessor` | 2.9.0 |
-| `DI` | `Compiler`, `Container`, `Definition`, `Provider` | ≤ 2.8.6 |
+| `Context` | `ContextStorage` | 2.11.0 |
+| `DI` | `BindableContainer` (2.11.0), `Compiler` (≤ 2.8.6), `Container` (≤ 2.8.6), `Definition` (≤ 2.8.6), `Provider` (≤ 2.8.6), `ServiceProvider` (2.11.0) | 2.11.0, ≤ 2.8.6 |
 | `DataStructure` | `Deque`, `Heap`, `Map`, `Queue`, `Set`, `Stack`, `Tree` | ≤ 2.8.6 |
 | `DataStructure\Behavioral` | `Comparable`, `Countable`, `Indexable`, `IterableCollection`, `Iterator`, `Modifiable`, `Searchable`, `Sortable` | ≤ 2.8.6 |
 | `DataStructure\Structural` | `BPlusTreeCollection`, `Collection`, `Serializable` | ≤ 2.8.6 |
 | `Environment` | `EnvironmentResolver` | 2.9.0 |
+| `Exception` | `Configuration`, `ContainerFailure`, `ExceptionInterface`, `NotFound`, `Protocol`, `Runtime`, `Validation` | 2.11.0 |
 | `Logging` | `LogFormatter`, `LogHandler`, `LogLevel`, `LogProcessor`, `LogRotator`, `Logger`, `LoggerExtendedInterface`, `LoggingManager` | ≤ 2.8.6 |
 | `Logging\Behavioral` | `Configurable`, `Loggable`, `LoggerConfigurable` | ≤ 2.8.6 |
 | `Logging\Structural` | `ContextAware`, `FormatterAware`, `HandlerAware`, `LoggerAware`, `ProcessorAware` | ≤ 2.8.6 |
@@ -258,6 +297,7 @@ it (the case since 2.8.6). Do not type against it.
 | `Processor\Attribute` | `BaseProcessorAttribute`, `CustomizableMessageAttribute`, `ProcessableAttribute` | ≤ 2.8.6 |
 | `Resilience` | `CallNotPermittedException` (2.9.0), `CallPermit` (2.10.0), `CircuitBreaker` (2.9.0), `ManualCircuitBreaker` (2.10.0), `RateLimitDecision` (2.10.0), `RateLimiter` (2.10.0), `RetryPolicy` (2.10.0) | 2.9.0, 2.10.0 |
 | `Sanitizer` | `Sanitizer` | ≤ 2.8.6 |
+| `Security` | `Identity` | 2.11.0 |
 | `Serializer` | `Serializer` | ≤ 2.8.6 |
 | `Transformer` | `Transformer` | ≤ 2.8.6 |
 | `Validator` | `Validator` | ≤ 2.8.6 |
@@ -279,8 +319,10 @@ interfaces only, no `Interface`/`Manager`/`Helper`/`Util` names, no getters
 without parameters, no `toArray()`/`jsonSerialize()`, one type per file named
 after it, typed constants, no hooks in readonly types (E-013), no authorship
 tags in docblocks, no runtime dependency, ARFA and ASVS levels declared;
-for the 2.10.0 ports, documentation criteria C1–C5 (Spec V4.3.3 §17) and
-synchronous signatures. The quality record is **PENDING**
+for the types added since 2.10.0, documentation criteria C1–C5 (Spec V4.3.3
+§17) and synchronous signatures; exception families as markers without
+members under one root; deprecations that name their removal. The quality
+record is **PENDING**
 until the gates run in CI.
 
 ## Ecosystem Position
@@ -291,6 +333,10 @@ until the gates run in CI.
                                     ManualCircuitBreaker ◀── processor-pipeline, dataflow (async stages), async
  rate-limiter 4.0.0 ──────────────▶ RateLimiter         ◀─── processor-pipeline, observability, dataflow, authenticator
  async-helper (planned adapter) ──▶ RetryPolicy         ◀─── processor-pipeline, queue; dataflow, observability
+ authenticator ───────────────────▶ Security\Identity   ◀─── authorization, router, graphql, grpc, websocket, sse
+ runtime, observability ──────────▶ Context\ContextStorage ◀─ observability, tenancy, authenticator
+ every component ─────────────────▶ Exception\*         ◀─── runtime and HTTP error handling
+ dependency-injection ────────────▶ DI\BindableContainer ◀── every component's ServiceProvider
  dotenv, configurator ────────────▶ Environment         ◀─── configurator (interpolation)
  components, configurator ────────▶ Configuration       ◀─── configurator (builder, value chain)
  configurator (ConfigurationProcessor) ─▶ Processor     ◀─── processor-pipeline (registry)
@@ -302,7 +348,7 @@ through this package (ADR-001).
 On Packagist, checked 2026-09-30, the latest tagged version of each
 `kariricode/*` package that requires the contract asks for `^2.0` to `^2.8`:
 data-structure `^2.0`, configurator and logging `^2.6`, validator `^2.7`,
-processor-pipeline and property-inspector `^2.8`. 2.10.0 satisfies all of
+processor-pipeline and property-inspector `^2.8`. 2.11.0 satisfies all of
 them on PHP 8.4. Migration of the consumers: SPEC-001 §8.
 
 ## Architecture
@@ -324,20 +370,27 @@ docs/adr/  docs/spec/  docs/quality/
 - Inherited source and tests are frozen: PHP CS Fixer skips them, and the
   PHPStan and Psalm baselines hold only findings in inherited files.
 
+- Supply chain (ADR-006): `composer.lock` pins the development toolchain;
+  `tools/sbom.php` writes a CycloneDX 1.5 SBOM; `.github/workflows/ci.yml`
+  runs every gate with actions pinned by commit SHA.
+
 ## Metrics
 
-Measured on 2026-10-01 in a local sandbox with PHP 8.4.23, not in CI.
+Measured on 2026-10-01 in a local sandbox with PHP 8.4.23 and the locked
+toolchain, not in CI.
 
 | Metric | Value |
 |---|---|
-| Types | 64 (63 interfaces, 1 inherited abstract class), 17 namespaces |
-| Public methods | 157 (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0); interface properties: 6 |
-| PHP lines in `src/` | 2,631 (258 new in 2.10.0) |
+| Types | 76 (75 interfaces, 1 inherited abstract class), 20 namespaces |
+| Public methods | 172 (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0, 15 from 2.11.0); interface properties: 10 |
+| PHP lines in `src/` | 3,113 (443 new in 2.11.0) |
 | Runtime dependencies | 0 |
-| Tests | 220 tests, 3,810 assertions, all passing |
+| Tests | 260 tests, 3,938 assertions, all passing |
 | PHPStan (level max) | 0 errors; baseline of 46 findings in 17 inherited files |
 | Psalm (error level 2) | 0 errors; baseline of 10 findings in 6 inherited files |
 | Psalm (error level 1, strict) | 0 errors, no baseline, over the source added since 2.9.0 (`composer psalm-strict`) |
+| Known vulnerabilities | none in the locked toolchain (`composer security`) |
+| SBOM | CycloneDX 1.5: 0 runtime, 95 development components (`composer sbom`) |
 | Line coverage | not measured (no coverage driver available) |
 
 ## License

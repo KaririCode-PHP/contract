@@ -11,4 +11,13 @@
     <projectFiles>
         <directory name="src"/>
     </projectFiles>
+    <issueHandlers>
+        <DeprecatedInterface>
+            <errorLevel type="suppress">
+                <!-- The four inherited DI contracts are deprecated together (ADR-005) and reference each other. -->
+                <file name="src/DI/Compiler.php"/>
+                <file name="src/DI/Provider.php"/>
+            </errorLevel>
+        </DeprecatedInterface>
+    </issueHandlers>
 </psalm>

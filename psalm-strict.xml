@@ -10,7 +10,13 @@
 >
     <projectFiles>
         <directory name="src/Configuration"/>
+        <directory name="src/Context"/>
         <directory name="src/Environment"/>
+        <directory name="src/Exception"/>
         <directory name="src/Resilience"/>
+        <directory name="src/Security"/>
+        <file name="src/DI/BindableContainer.php"/>
+        <file name="src/DI/ServiceProvider.php"/>
+        <file name="src/SerializableData.php"/>
     </projectFiles>
 </psalm>

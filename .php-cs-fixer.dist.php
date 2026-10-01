@@ -7,9 +7,11 @@ declare(strict_types=1);
 $inherited = ['DI', 'DataStructure', 'Logging', 'Processor', 'Sanitizer', 'Serializer', 'Transformer', 'Validator'];
 
 $finder = (new PhpCsFixer\Finder())
-    ->in([__DIR__ . '/src', __DIR__ . '/tests'])
+    ->in([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/tools'])
     ->exclude($inherited)
-    ->notPath('ImmutableValue.php');
+    ->notPath('ImmutableValue.php')
+    // Files added since 2.11.0 inside a frozen directory are new code.
+    ->append([__DIR__ . '/src/DI/BindableContainer.php', __DIR__ . '/src/DI/ServiceProvider.php']);
 
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)

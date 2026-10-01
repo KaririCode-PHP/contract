@@ -48,6 +48,21 @@ final class BackwardCompatibilityTest extends TestCase
     }
 
     #[Test]
+    public function aSupertypeMayBeAddedOnlyWhenItBringsNoMember(): void
+    {
+        $type = 'KaririCode\\Contract\\Resilience\\CallNotPermittedException';
+        $baseline = self::baseline('2.10.0');
+
+        self::assertSame([], self::differences([$type => $baseline[$type]], self::currentTypes()), 'Exception\\Runtime adds no member');
+
+        $narrowed = $baseline[$type];
+        self::assertIsArray($narrowed);
+        $narrowed['interfaces'] = ['Stringable'];
+
+        self::assertNotSame([], self::differences([$type => $narrowed], self::currentTypes()), 'gaining Throwable would add getMessage() and the rest');
+    }
+
+    #[Test]
     #[DataProvider('releases')]
     public function theFixtureIsTheSnapshotOfItsRelease(string $version): void
     {
@@ -109,6 +124,12 @@ final class BackwardCompatibilityTest extends TestCase
      */
     private static function compare(string $path, mixed $expected, mixed $actual, array &$differences): void
     {
+        if (str_ends_with($path, '.interfaces') && is_array($expected) && is_array($actual)) {
+            self::compareSupertypes($path, $expected, $actual, $differences);
+
+            return;
+        }
+
         if (!is_array($expected) || !is_array($actual)) {
             if ($expected !== $actual) {
                 $differences[] = sprintf('%s: %s -> %s', $path, self::show($expected), self::show($actual));
@@ -168,5 +189,52 @@ final class BackwardCompatibilityTest extends TestCase
     private static function currentTypes(): array
     {
         return ApiSnapshot::capture(dirname(__DIR__, 2) . '/src')['types'];
+    }
+
+    /**
+     * A type may gain a supertype only when the supertype brings no member the
+     * type did not already have (a marker such as Exception\Runtime); losing
+     * one is always a break.
+     *
+     * @param array<array-key, mixed> $expected
+     * @param array<array-key, mixed> $actual
+     * @param list<string>            $differences
+     */
+    private static function compareSupertypes(string $path, array $expected, array $actual, array &$differences): void
+    {
+        $before = array_values(array_filter($expected, 'is_string'));
+        $after = array_values(array_filter($actual, 'is_string'));
+
+        foreach (array_diff($before, $after) as $removed) {
+            $differences[] = sprintf('%s: %s removed', $path, $removed);
+        }
+
+        $known = [];
+        foreach ($before as $name) {
+            if (interface_exists($name)) {
+                $known = [...$known, ...self::memberNames($name)];
+            }
+        }
+
+        foreach (array_diff($after, $before) as $added) {
+            if (!interface_exists($added) || array_diff(self::memberNames($added), $known) !== []) {
+                $differences[] = sprintf('%s: %s added with new members', $path, $added);
+            }
+        }
+    }
+
+    /**
+     * @param class-string $interface
+     *
+     * @return list<string>
+     */
+    private static function memberNames(string $interface): array
+    {
+        $type = new \ReflectionClass($interface);
+
+        return [
+            ...array_map(static fn(\ReflectionMethod $method): string => $method->getName() . '()', $type->getMethods()),
+            ...array_map(static fn(\ReflectionProperty $property): string => '$' . $property->getName(), $type->getProperties()),
+        ];
     }
 }

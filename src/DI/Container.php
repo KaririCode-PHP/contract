@@ -10,6 +10,8 @@ namespace KaririCode\Contract\DI;
  * Defines the contract for a dependency injection container that manages the creation and resolution of services.
  *
  * @category  DependencyInjection
+ *
+ * @deprecated 2.11.0 Removed in 3.0.0; providers bind through BindableContainer, and applications resolve through PSR-11 (ADR-005).
  */
 interface Container
 {

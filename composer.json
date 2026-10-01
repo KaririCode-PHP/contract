@@ -36,6 +36,8 @@
         "phpstan": "phpstan analyse --no-progress",
         "psalm": "psalm --no-cache",
         "psalm-strict": "psalm -c psalm-strict.xml --no-cache",
+        "security": "@composer audit --locked",
+        "sbom": "php tools/sbom.php sbom.cdx.json",
         "cs-check": "php-cs-fixer fix --dry-run --diff",
         "cs-fix": "php-cs-fixer fix",
         "check": ["@cs-check", "@phpstan", "@psalm", "@psalm-strict", "@test"]

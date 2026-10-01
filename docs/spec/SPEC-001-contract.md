@@ -1,10 +1,10 @@
-# SPEC-001: kariricode/contract 2.10.1
+# SPEC-001: kariricode/contract 2.11.0
 
 | Field | Value |
 |---|---|
 | Status | Accepted (content); quality gate PENDING — see QD-V40-COMPLIANCE |
 | Date | 2026-09-30 |
-| Component | kariricode/contract 2.10.1 |
+| Component | kariricode/contract 2.11.0 |
 | Authors | Walmir Silva <walmir.silva@kariricode.org> |
 | Standards | ARFA 1.3 (level 1); KaririCode Code Quality Directive V4.0 |
 | Error codes | none: the package declares interfaces and throws nothing |
@@ -17,8 +17,10 @@
 so that one package implements a contract and others type against it
 without depending on each other (ADR-001). 2.9.0 added five interfaces to
 the 2.8.6 package (ADR-002, ADR-003); 2.10.0 adds five resilience ports
-(ADR-004); 2.10.1 changes documentation and tests only. No type of an
-earlier release changed.
+(ADR-004); 2.10.1 changed documentation and tests only; 2.11.0 adds the
+cross-cutting contracts of ADR-005 and the supply chain of ADR-006. No type
+of an earlier release lost or changed a member; `CallNotPermittedException`
+gained the member-free supertype `Exception\Runtime` (§4).
 
 ## 2. API Added Since 2.8.6
 
@@ -151,23 +153,84 @@ interface RetryPolicy
 Units: the limiter's waits (`retryAfter`, `resetAfter`) and the breaker's
 hint (`retryAfterSeconds`) are whole seconds; retry delays are milliseconds.
 
+### 2.3 In 2.11.0 (ADR-005)
+
+```php
+namespace KaririCode\Contract\Exception;
+interface ExceptionInterface extends \Throwable {}
+interface Validation extends ExceptionInterface {}       // also NotFound, Configuration,
+                                                         // Protocol, ContainerFailure, Runtime
+namespace KaririCode\Contract\DI;
+interface BindableContainer
+{
+    public function get(string $id): mixed;
+    public function has(string $id): bool;
+    public function bind(string $abstract, callable|string|null $concrete, bool $singleton = false): void;
+    public function instance(string $abstract, mixed $value): void;
+}
+interface ServiceProvider
+{
+    public function register(BindableContainer $container): void;
+    public function boot(): void;
+}
+
+namespace KaririCode\Contract\Security;
+interface Identity
+{
+    public string $subject { get; }
+    public array $roles { get; }      // list<string>
+    public array $scopes { get; }     // list<string>
+    public array $claims { get; }     // array<string, mixed>
+    public function hasRole(string $role): bool;
+    public function hasScope(string $scope): bool;
+    public function hasAnyRole(string ...$roles): bool;
+    public function hasAllScopes(string ...$scopes): bool;
+    public function claim(string $key, mixed $default = null): mixed;
+    public function isAnonymous(): bool;
+}
+
+namespace KaririCode\Contract\Context;
+interface ContextStorage
+{
+    public function store(string $type, object $value): void;  // @template T, class-string<T>, T
+    public function find(string $type): ?object;                // @return T|null
+    public function clear(): void;
+}
+
+namespace KaririCode\Contract;
+interface SerializableData {}
+```
+
+| Member | Semantics | Verified by |
+|---|---|---|
+| exception families | markers without members under `ExceptionInterface`; an ecosystem exception implements exactly one; the edge maps them to 422, 404, 400, 500 or 503 | `ExceptionFamiliesTest` |
+| `CallNotPermittedException` | a `Runtime` fault that keeps `retryAfterSeconds` | `anOpenCircuitIsARuntimeFaultThatKeepsItsDelay` |
+| `ServiceProvider` | every provider registers before any boots; `register()` binds and never resolves | `everyProviderRegistersBeforeAnyBoots` |
+| `BindableContainer` | singletons built once; `null` builds the abstract; unknown id → `NotFound`; failing factory → `ContainerFailure` | `ServiceProviderTest` |
+| `Identity` | checks only read; `hasAllScopes()` without arguments is true; a present null claim is not replaced by the default; anonymous is an `Identity` with nothing granted | `IdentityTest` |
+| `ContextStorage` | slots keyed by the named type; empty slot reads null; `store()` replaces; `clear()` empties; one context per fiber | `ContextStorageTest` |
+| `SerializableData` | public readonly properties are the JSON form, nested included; a pure enum breaks the precondition | `SerializableDataTest` |
+
 ## 3. Inventory
 
-64 types in 17 namespaces: 63 interfaces and one inherited abstract class.
-157 public methods (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0) and six
-interface properties (one from 2.9.0, five from 2.10.0).
+76 types in 20 namespaces: 75 interfaces and one inherited abstract class.
+172 public methods (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0, 15 from
+2.11.0) and ten interface properties (one from 2.9.0, five from 2.10.0, four
+from 2.11.0).
 
 ### 3.1 Namespaces
 
 | Namespace | Types | Since |
 |---|---|---|
-| `(root)` | `ImmutableValue` | ≤ 2.8.6 |
+| `(root)` | `ImmutableValue` (≤ 2.8.6), `SerializableData` (2.11.0) | ≤ 2.8.6, 2.11.0 |
 | `Configuration` | `ConfigProvider`, `ValueProcessor` | 2.9.0 |
-| `DI` | `Compiler`, `Container`, `Definition`, `Provider` | ≤ 2.8.6 |
+| `Context` | `ContextStorage` | 2.11.0 |
+| `DI` | `BindableContainer` (2.11.0), `Compiler` (≤ 2.8.6), `Container` (≤ 2.8.6), `Definition` (≤ 2.8.6), `Provider` (≤ 2.8.6), `ServiceProvider` (2.11.0) | 2.11.0, ≤ 2.8.6 |
 | `DataStructure` | `Deque`, `Heap`, `Map`, `Queue`, `Set`, `Stack`, `Tree` | ≤ 2.8.6 |
 | `DataStructure\Behavioral` | `Comparable`, `Countable`, `Indexable`, `IterableCollection`, `Iterator`, `Modifiable`, `Searchable`, `Sortable` | ≤ 2.8.6 |
 | `DataStructure\Structural` | `BPlusTreeCollection`, `Collection`, `Serializable` | ≤ 2.8.6 |
 | `Environment` | `EnvironmentResolver` | 2.9.0 |
+| `Exception` | `Configuration`, `ContainerFailure`, `ExceptionInterface`, `NotFound`, `Protocol`, `Runtime`, `Validation` | 2.11.0 |
 | `Logging` | `LogFormatter`, `LogHandler`, `LogLevel`, `LogProcessor`, `LogRotator`, `Logger`, `LoggerExtendedInterface`, `LoggingManager` | ≤ 2.8.6 |
 | `Logging\Behavioral` | `Configurable`, `Loggable`, `LoggerConfigurable` | ≤ 2.8.6 |
 | `Logging\Structural` | `ContextAware`, `FormatterAware`, `HandlerAware`, `LoggerAware`, `ProcessorAware` | ≤ 2.8.6 |
@@ -175,6 +238,7 @@ interface properties (one from 2.9.0, five from 2.10.0).
 | `Processor\Attribute` | `BaseProcessorAttribute`, `CustomizableMessageAttribute`, `ProcessableAttribute` | ≤ 2.8.6 |
 | `Resilience` | `CallNotPermittedException` (2.9.0), `CallPermit` (2.10.0), `CircuitBreaker` (2.9.0), `ManualCircuitBreaker` (2.10.0), `RateLimitDecision` (2.10.0), `RateLimiter` (2.10.0), `RetryPolicy` (2.10.0) | 2.9.0, 2.10.0 |
 | `Sanitizer` | `Sanitizer` | ≤ 2.8.6 |
+| `Security` | `Identity` | 2.11.0 |
 | `Serializer` | `Serializer` | ≤ 2.8.6 |
 | `Transformer` | `Transformer` | ≤ 2.8.6 |
 | `Validator` | `Validator` | ≤ 2.8.6 |
@@ -188,6 +252,7 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 | Type | Since | Kind | Extends | Members |
 |---|---|---|---|---|
 | `ImmutableValue` | ≤ 2.8.6 | interface | — | — (marker) |
+| `SerializableData` | 2.11.0 | interface | — | — (marker) |
 
 **`Configuration`**
 
@@ -196,14 +261,22 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 | `ConfigProvider` | 2.9.0 | interface | — | `namespace(): string`<br>`defaults(): array`<br>`schema(): array` |
 | `ValueProcessor` | 2.9.0 | interface | — | `supports(mixed $value): bool`<br>`process(mixed $value): mixed` |
 
+**`Context`**
+
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `ContextStorage` | 2.11.0 | interface | — | `store(string $type, object $value): void`<br>`find(string $type): ?object`<br>`clear(): void` |
+
 **`DI`**
 
 | Type | Since | Kind | Extends | Members |
 |---|---|---|---|---|
+| `BindableContainer` | 2.11.0 | interface | — | `get(string $id): mixed`<br>`has(string $id): bool`<br>`bind(string $abstract, callable|string|null $concrete, bool $singleton = false): void`<br>`instance(string $abstract, mixed $value): void` |
 | `Compiler` | ≤ 2.8.6 | interface | — | `compile(DI\Container $container): DI\Container`<br>`writeToFile(string $path): void`<br>`loadFromFile(string $path): DI\Container` |
 | `Container` | ≤ 2.8.6 | interface | — | `set(string $id, callable $service): void`<br>`get(string $id): mixed`<br>`has(string $id): bool`<br>`resolve(string $abstract): object`<br>`bind(string $abstract, mixed $concrete, array $parameters = []): void`<br>`singleton(string $abstract, mixed $concrete, array $parameters = []): void`<br>`factory(string $abstract, mixed $concrete, array $parameters = []): void`<br>`tag(string $tag, array $abstracts): void`<br>`tagged(string $tag): array`<br>`call(callable|string $callback, array $parameters = []): mixed`<br>`extend(string $abstract, Closure $extender): void`<br>`alias(string $abstract, string $alias): void` |
 | `Definition` | ≤ 2.8.6 | interface | — | `getConcrete(): mixed`<br>`getParameters(): array`<br>`getTags(): array`<br>`isSingleton(): bool`<br>`isFactory(): bool` |
 | `Provider` | ≤ 2.8.6 | interface | — | `register(DI\Container $container): void`<br>`boot(DI\Container $container): void` |
+| `ServiceProvider` | 2.11.0 | interface | — | `register(DI\BindableContainer $container): void`<br>`boot(): void` |
 
 **`DataStructure`**
 
@@ -243,6 +316,18 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 | Type | Since | Kind | Extends | Members |
 |---|---|---|---|---|
 | `EnvironmentResolver` | 2.9.0 | interface | — | `get(string $name): ?string`<br>`has(string $name): bool` |
+
+**`Exception`**
+
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Configuration` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
+| `ContainerFailure` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
+| `ExceptionInterface` | 2.11.0 | interface | `\Throwable` | — (marker) |
+| `NotFound` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
+| `Protocol` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
+| `Runtime` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
+| `Validation` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
 
 **`Logging`**
 
@@ -300,7 +385,7 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 
 | Type | Since | Kind | Extends | Members |
 |---|---|---|---|---|
-| `CallNotPermittedException` | 2.9.0 | interface | `\Throwable` | `?int $retryAfterSeconds { get; }` |
+| `CallNotPermittedException` | 2.9.0 | interface | `Exception\Runtime` | `?int $retryAfterSeconds { get; }` |
 | `CallPermit` | 2.10.0 | interface | — | — (marker) |
 | `CircuitBreaker` | 2.9.0 | interface | — | `execute(callable $operation): mixed`<br>`isOpen(): bool` |
 | `ManualCircuitBreaker` | 2.10.0 | interface | `Resilience\CircuitBreaker` | `tryAcquirePermit(): ?Resilience\CallPermit`<br>`acquirePermit(): Resilience\CallPermit`<br>`recordSuccess(Resilience\CallPermit $permit): void`<br>`recordFailure(Resilience\CallPermit $permit, Throwable $error): void`<br>`releasePermit(Resilience\CallPermit $permit): void` |
@@ -313,6 +398,12 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 | Type | Since | Kind | Extends | Members |
 |---|---|---|---|---|
 | `Sanitizer` | ≤ 2.8.6 | interface | — | `sanitize(mixed $input): mixed` |
+
+**`Security`**
+
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `Identity` | 2.11.0 | interface | — | `string $subject { get; }`<br>`array $roles { get; }`<br>`array $scopes { get; }`<br>`array $claims { get; }`<br>`hasRole(string $role): bool`<br>`hasScope(string $scope): bool`<br>`hasAnyRole(string $roles): bool`<br>`hasAllScopes(string $scopes): bool`<br>`claim(string $key, mixed $default = null): mixed`<br>`isAnonymous(): bool` |
 
 **`Serializer`**
 
@@ -350,6 +441,10 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
   `86b11923…`) before 2.10.0 changed anything: 59 types.
 - **2.10.0 snapshot.** `tests/Compatibility/fixtures/2.10.0.json`, from the
   2.10.0 release tarball (SHA-256 `7197a543…`): 64 types.
+- **Supertypes.** A type may gain a supertype only when the supertype
+  brings no method or property the type did not already have
+  (`aSupertypeMayBeAddedOnlyWhenItBringsNoMember`). `CallNotPermittedException`
+  gained `Exception\Runtime` that way in 2.11.0.
 - **Rule.** Every snapshot type must exist with an identical record. A
   removal, a change or an addition inside an inherited type fails, because a
   new method, parameter or parent interface breaks implementers. New types
@@ -377,6 +472,11 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
   named queries and keep the signatures every Configurator provider
   implements (ADR-003 §3).
 
+- `Exception\ExceptionInterface` keeps the suffix under E-035 (sanctioned
+  root contract); the conformance test lists it as the only exception.
+- A deprecation names the release that deprecates and the release that
+  removes (`@deprecated 2.11.0 Removed in 3.0.0`).
+
 ## 6. Package Rules
 
 - Interfaces only, including marker interfaces (ADR-001).
@@ -393,9 +493,9 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 | Suite | Directory | Result (local) | What it proves |
 |---|---|---|---|
 | `inherited` | `tests/DI`, `DataStructure`, `Logging`, `Processor`, `Sanitizer`, `Serializer`, `Transformer`, `Validator` | 160 tests, 393 assertions | the 2.8.6 tests run unchanged on PHPUnit 11.5 |
-| `unit` | `tests/Unit` | 39 tests, 3,337 assertions | a minimal implementation of each contract added since 2.9.0 behaves as §2 states; most assertions come from sampling retry delays |
-| `compatibility` | `tests/Compatibility` | 7 tests, 39 assertions | every 2.8.6, 2.9.0 and 2.10.0 type keeps its API; the comparison detects differences |
-| `conformance` | `tests/Conformance` | 14 tests, 41 assertions | the rules of §10 over the whole `src/` tree; for the 2.10.0 ports, documentation criteria C1–C5 and synchronous signatures; ARFA and ASVS levels (G4) |
+| `unit` | `tests/Unit` | 76 tests, 3,408 assertions | a minimal implementation of each contract added since 2.9.0 behaves as §2 states; most assertions come from sampling retry delays |
+| `compatibility` | `tests/Compatibility` | 8 tests, 45 assertions | every 2.8.6, 2.9.0 and 2.10.0 type keeps its API; a supertype may be added only when it brings no member; the comparison detects differences |
+| `conformance` | `tests/Conformance` | 16 tests, 92 assertions | the rules of §10 over the whole `src/` tree; for the types added since 2.10.0, documentation criteria C1–C5 and synchronous signatures; exception markers; DI deprecations; ARFA and ASVS levels (G4) |
 
 ## 8. Consumer Migration
 
@@ -465,6 +565,21 @@ the literal copy (SHA-256 of `CircuitBreaker.php`
 | async 4.0 | `Integration\CircuitBreakerBridge(object $circuitBreaker, …)` returning a promise | `ManualCircuitBreaker` | acquire a permit, settle it when the promise settles; `releasePermit()` when the operation never starts |
 | processor-pipeline | no resilience decorators | `ManualCircuitBreaker`, `RateLimiter`, `RetryPolicy` | decorators typed against the ports; `"kariricode/contract": "^2.10"` |
 
+### 8.5 Cross-cutting contracts (2.11.0)
+
+| Package | Change |
+|---|---|
+| every component | each exception implements one family (`Validation`, `NotFound`, `Configuration`, `Protocol`, `ContainerFailure`, `Runtime`); providers import `ServiceProvider` and `BindableContainer` from `KaririCode\Contract\DI` instead of `KaririCode\Framework\Contract` and drop their test stubs |
+| framework | the kernel consumes `Contract\DI\ServiceProvider`; keep the old names as aliases for one minor release |
+| dependency-injection | `Container` implements `BindableContainer` and PSR-11; its exceptions implement `NotFound` or `ContainerFailure` and the PSR-11 exception interfaces |
+| authenticator | `Identity` and `AnonymousIdentity` implement `Contract\Security\Identity`; the authenticated identity is stored in `ContextStorage` |
+| authorization | drop the `require` on kariricode/authenticator; type against `Contract\Security\Identity` |
+| router, graphql, grpc, websocket, sse | guards and resolvers type against `Contract\Security\Identity` |
+| runtime | one `ContextStorage` per driver (memory under PHP-FPM, coroutine context under Swoole, fiber map); `clear()` when a request ends; the error handler maps the exception families |
+| observability | trace context in `ContextStorage`; its own `ContextStorage` becomes an adapter or goes away (its static implementation breaks Spec §12) |
+| tenancy | the current `TenantContext` in `ContextStorage` instead of the mutable `TenantRegistry` |
+| circuit-breaker | nothing to do: `CircuitOpenException` becomes a `Runtime` through `CallNotPermittedException` |
+
 ## 9. Errata E-013 (proposed)
 
 **Problem.** Spec V4.0 allows `get` property hooks in `final readonly`
@@ -527,9 +642,13 @@ renumbering.
 | E-003 backed enums | no enum is declared | not applicable |
 | E-006 measured claims only | README metrics measured; QD stays PENDING | `docs/quality/QD-V40-COMPLIANCE.md` |
 | Static analysis | PHPStan max and Psalm 2: 0 errors in new code; inherited findings in baselines. Psalm 1 (strict, no baseline) over the source added since 2.9.0: 0 errors | `staticAnalysisBaselinesCoverInheritedFilesOnly`, `composer psalm-strict` |
-| Documentation criteria C1–C5 (Spec V4.3.3 §17) on the 2.10.0 ports | preconditions and thread-safety (C2), side effects (C3), example (C4), references (C5) | `theResiliencePortsDocumentTheFiveCriteria` |
-| Level 1: nothing asynchronous | no promise, fiber or generator in the ports' signatures | `theResiliencePortsAreSynchronousInterfaces` |
+| Documentation criteria C1–C5 (Spec V4.3.3 §17) on the types added since 2.10.0 | preconditions and thread-safety (C2), side effects (C3), example (C4), references (C5) | `theTypesAddedSince210DocumentTheFiveCriteria` |
+| Level 1: nothing asynchronous | no promise, fiber or generator in the signatures of the types added since 2.10.0 | `theTypesAddedSince210AreSynchronousInterfaces` |
 | Additive over 2.9.0 and 2.10.0 | their APIs unchanged | `BackwardCompatibilityTest` (2.9.0 and 2.10.0 snapshots) |
+| Supertypes added without members | `CallNotPermittedException` gains `Exception\Runtime` | `aSupertypeMayBeAddedOnlyWhenItBringsNoMember` |
+| Exception families (§8.4) | markers without members under one root; the root keeps its suffix (E-035) | `theExceptionFamiliesAreMemberFreeMarkersUnderOneRoot`, `namesCarryNoInterfaceSuffixNorVagueNoun` |
+| Deprecations | the four inherited DI contracts name 2.11.0 and their removal in 3.0.0 | `theInheritedDiContractsAreDeprecatedForRemovalIn300` |
+| Supply chain (§32) | committed lock file, audit, SBOM, CI pinned by SHA | ADR-006; `composer validate --strict`, `composer security`, `composer sbom` |
 | Levels declared (G4) | `extra.arfa.level` and `extra.asvs.level` | `composerDeclaresTheArfaAndAsvsLevels` |
 
 ## 11. Inherited Deviations (3.0.0)
@@ -591,6 +710,10 @@ Other findings, outside the automated rules:
 - The line numbers of the libraries' own APIs could not be checked: their
   release tarballs were not available when 2.10.0 was written (ADR-004 cites
   their design records).
+- No library implements the 2.11.0 families yet; their semantics rest on
+  the unit fixtures (`ArrayContainer`, `Principal`, `FiberContextStorage`).
+- The CI workflow has not run on GitHub yet; every gate result here is
+  local.
 
 ## 13. References
 
@@ -612,3 +735,8 @@ Other findings, outside the automated rules:
 - `kariricode/rate-limiter` 4.0.0, SPEC-001 §3; ADR-004 of this package.
 - Spec V4.3.3 §17 (documentation criteria C1–C5) and §29.3 (gate G4).
 - ADR-005 (proposed): shared cross-cutting contracts for 2.11.0.
+- ADR-005 (accepted) and ADR-006 of this package.
+- Semantic Versioning 2.0.0, FAQ on deprecation.
+- RFC 9110, HTTP Semantics (§10.2.3, §15.5, §15.6).
+- OpenID Connect Core 1.0 §2; OpenTelemetry Specification, "Context"; PHP-FIG PSR-11.
+- OWASP CycloneDX Specification 1.5.

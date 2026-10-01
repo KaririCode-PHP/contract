@@ -30,14 +30,27 @@ final class ArfaConformanceTest extends TestCase
 
     private const array NEW_NAMESPACES = [
         'KaririCode\\Contract\\Configuration\\',
+        'KaririCode\\Contract\\Context\\',
         'KaririCode\\Contract\\Environment\\',
+        'KaririCode\\Contract\\Exception\\',
         'KaririCode\\Contract\\Resilience\\',
+        'KaririCode\\Contract\\Security\\',
     ];
 
     private const array NEW_TYPES = [
         'KaririCode\\Contract\\Configuration\\ConfigProvider',
         'KaririCode\\Contract\\Configuration\\ValueProcessor',
+        'KaririCode\\Contract\\Context\\ContextStorage',
+        'KaririCode\\Contract\\DI\\BindableContainer',
+        'KaririCode\\Contract\\DI\\ServiceProvider',
         'KaririCode\\Contract\\Environment\\EnvironmentResolver',
+        'KaririCode\\Contract\\Exception\\Configuration',
+        'KaririCode\\Contract\\Exception\\ContainerFailure',
+        'KaririCode\\Contract\\Exception\\ExceptionInterface',
+        'KaririCode\\Contract\\Exception\\NotFound',
+        'KaririCode\\Contract\\Exception\\Protocol',
+        'KaririCode\\Contract\\Exception\\Runtime',
+        'KaririCode\\Contract\\Exception\\Validation',
         'KaririCode\\Contract\\Resilience\\CallNotPermittedException',
         'KaririCode\\Contract\\Resilience\\CallPermit',
         'KaririCode\\Contract\\Resilience\\CircuitBreaker',
@@ -45,10 +58,39 @@ final class ArfaConformanceTest extends TestCase
         'KaririCode\\Contract\\Resilience\\RateLimitDecision',
         'KaririCode\\Contract\\Resilience\\RateLimiter',
         'KaririCode\\Contract\\Resilience\\RetryPolicy',
+        'KaririCode\\Contract\\Security\\Identity',
+        'KaririCode\\Contract\\SerializableData',
     ];
 
-    /** Ports added in 2.10.0; their docblocks follow criteria C1–C5 of Spec V4.3.3 §17. */
-    private const array RESILIENCE_PORTS = [
+    /** Errata E-035: sanctioned root contracts keep the Interface suffix. */
+    private const array SANCTIONED_ROOTS = [
+        \KaririCode\Contract\Exception\ExceptionInterface::class,
+    ];
+
+    private const array EXCEPTION_FAMILIES = [
+        \KaririCode\Contract\Exception\Configuration::class,
+        \KaririCode\Contract\Exception\ContainerFailure::class,
+        \KaririCode\Contract\Exception\NotFound::class,
+        \KaririCode\Contract\Exception\Protocol::class,
+        \KaririCode\Contract\Exception\Runtime::class,
+        \KaririCode\Contract\Exception\Validation::class,
+    ];
+
+    /** Types added since 2.10.0; their docblocks follow criteria C1–C5 of Spec V4.3.3 §17. */
+    private const array DOCUMENTED_TYPES = [
+        \KaririCode\Contract\Context\ContextStorage::class,
+        \KaririCode\Contract\DI\BindableContainer::class,
+        \KaririCode\Contract\DI\ServiceProvider::class,
+        \KaririCode\Contract\Exception\Configuration::class,
+        \KaririCode\Contract\Exception\ContainerFailure::class,
+        \KaririCode\Contract\Exception\ExceptionInterface::class,
+        \KaririCode\Contract\Exception\NotFound::class,
+        \KaririCode\Contract\Exception\Protocol::class,
+        \KaririCode\Contract\Exception\Runtime::class,
+        \KaririCode\Contract\Exception\Validation::class,
+        \KaririCode\Contract\Resilience\CallNotPermittedException::class,
+        \KaririCode\Contract\Security\Identity::class,
+        \KaririCode\Contract\SerializableData::class,
         \KaririCode\Contract\Resilience\CallPermit::class,
         \KaririCode\Contract\Resilience\ManualCircuitBreaker::class,
         \KaririCode\Contract\Resilience\RateLimitDecision::class,
@@ -119,6 +161,10 @@ final class ArfaConformanceTest extends TestCase
         $found = [];
 
         foreach (self::types() as $type) {
+            if (in_array($type->getName(), self::SANCTIONED_ROOTS, true)) {
+                continue;
+            }
+
             if (preg_match('/Interface$|(?:Manager|Helper|Utils?)(?=[A-Z]|$)/', $type->getShortName()) === 1) {
                 $found[] = $type->getName();
             }
@@ -264,11 +310,11 @@ final class ArfaConformanceTest extends TestCase
     }
 
     #[Test]
-    public function theResiliencePortsDocumentTheFiveCriteria(): void
+    public function theTypesAddedSince210DocumentTheFiveCriteria(): void
     {
         $missing = [];
 
-        foreach (self::RESILIENCE_PORTS as $port) {
+        foreach (self::DOCUMENTED_TYPES as $port) {
             $docblock = (string) (new ReflectionClass($port))->getDocComment();
             $criteria = [
                 'preconditions (C2)' => 'Preconditions',
@@ -293,6 +339,40 @@ final class ArfaConformanceTest extends TestCase
     }
 
     #[Test]
+    public function theExceptionFamiliesAreMemberFreeMarkersUnderOneRoot(): void
+    {
+        $root = new ReflectionClass(\KaririCode\Contract\Exception\ExceptionInterface::class);
+        self::assertTrue($root->isSubclassOf(\Throwable::class));
+        self::assertSame([], self::ownMembers($root));
+
+        foreach (self::EXCEPTION_FAMILIES as $family) {
+            $type = new ReflectionClass($family);
+
+            self::assertTrue($type->isInterface(), $family);
+            self::assertSame([$root->getName()], array_values(array_diff($type->getInterfaceNames(), $root->getInterfaceNames())), $family . ' extends the root directly');
+            self::assertSame([], self::ownMembers($type), $family);
+        }
+
+        self::assertTrue((new ReflectionClass(\KaririCode\Contract\Resilience\CallNotPermittedException::class))->isSubclassOf(\KaririCode\Contract\Exception\Runtime::class));
+    }
+
+    #[Test]
+    public function theInheritedDiContractsAreDeprecatedForRemovalIn300(): void
+    {
+        $deprecated = [];
+
+        foreach (self::types() as $type) {
+            if (str_starts_with($type->getName(), 'KaririCode\\Contract\\DI\\') && in_array($type->getShortName(), ['Compiler', 'Container', 'Definition', 'Provider'], true)) {
+                self::assertStringContainsString('@deprecated 2.11.0 Removed in 3.0.0', (string) $type->getDocComment(), $type->getName());
+                $deprecated[] = $type->getShortName();
+            }
+        }
+
+        sort($deprecated);
+        self::assertSame(['Compiler', 'Container', 'Definition', 'Provider'], $deprecated);
+    }
+
+    #[Test]
     public function composerDeclaresTheArfaAndAsvsLevels(): void
     {
         /** @var array{extra?: array{arfa?: array{version?: string, level?: int}, asvs?: array{version?: string, level?: int}}} $composer */
@@ -305,11 +385,11 @@ final class ArfaConformanceTest extends TestCase
     }
 
     #[Test]
-    public function theResiliencePortsAreSynchronousInterfaces(): void
+    public function theTypesAddedSince210AreSynchronousInterfaces(): void
     {
         $found = [];
 
-        foreach (self::RESILIENCE_PORTS as $port) {
+        foreach (self::DOCUMENTED_TYPES as $port) {
             $type = new ReflectionClass($port);
             self::assertTrue($type->isInterface(), $port);
 
@@ -387,5 +467,29 @@ final class ArfaConformanceTest extends TestCase
         $separator = strrpos($type, '\\');
 
         return $separator === false ? $type : substr($type, $separator + 1);
+    }
+
+    /**
+     * @param ReflectionClass<object> $type
+     *
+     * @return list<string>
+     */
+    private static function ownMembers(ReflectionClass $type): array
+    {
+        $members = [];
+
+        foreach ($type->getMethods() as $method) {
+            if ($method->getDeclaringClass()->getName() === $type->getName()) {
+                $members[] = $method->getName() . '()';
+            }
+        }
+
+        foreach ($type->getProperties() as $property) {
+            if ($property->getDeclaringClass()->getName() === $type->getName()) {
+                $members[] = '$' . $property->getName();
+            }
+        }
+
+        return $members;
     }
 }
