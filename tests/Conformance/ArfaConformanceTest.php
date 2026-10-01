@@ -47,7 +47,7 @@ final class ArfaConformanceTest extends TestCase
         'KaririCode\\Contract\\Resilience\\RetryPolicy',
     ];
 
-    /** Ports added in 2.10.0; their docblocks follow the E-005 criteria. */
+    /** Ports added in 2.10.0; their docblocks follow criteria C1–C5 of Spec V4.3.3 §17. */
     private const array RESILIENCE_PORTS = [
         \KaririCode\Contract\Resilience\CallPermit::class,
         \KaririCode\Contract\Resilience\ManualCircuitBreaker::class,
@@ -272,7 +272,8 @@ final class ArfaConformanceTest extends TestCase
             $docblock = (string) (new ReflectionClass($port))->getDocComment();
             $criteria = [
                 'preconditions (C2)' => 'Preconditions',
-                'thread-safety (C3)' => 'Thread-safety:',
+                'thread-safety (C2)' => 'Thread-safety:',
+                'side effects (C3)' => 'Side effects:',
                 'example (C4)' => 'Example',
                 'references (C5)' => 'References:',
             ];
@@ -289,6 +290,18 @@ final class ArfaConformanceTest extends TestCase
         }
 
         self::assertSame([], $missing);
+    }
+
+    #[Test]
+    public function composerDeclaresTheArfaAndAsvsLevels(): void
+    {
+        /** @var array{extra?: array{arfa?: array{version?: string, level?: int}, asvs?: array{version?: string, level?: int}}} $composer */
+        $composer = json_decode((string) file_get_contents(dirname(__DIR__, 2) . '/composer.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertSame('1.3', $composer['extra']['arfa']['version'] ?? null, 'Spec V4.3.3 §29.3 G4: arfa.version');
+        self::assertSame(1, $composer['extra']['arfa']['level'] ?? null, 'G4: arfa.level');
+        self::assertSame('5.0', $composer['extra']['asvs']['version'] ?? null, 'G4: asvs.version');
+        self::assertContains($composer['extra']['asvs']['level'] ?? null, [1, 2, 3], 'G4: asvs.level');
     }
 
     #[Test]

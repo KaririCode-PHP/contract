@@ -17,6 +17,8 @@ namespace KaririCode\Contract\Resilience;
  * Thread-safety: a decision is an immutable snapshot and may be shared
  * freely; it describes the instant it was taken, not the present.
  *
+ * Side effects: none; reading a property never consults the limiter.
+ *
  * Example:
  *
  *     if (!$decision->allowed) {

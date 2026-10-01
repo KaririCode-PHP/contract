@@ -9,8 +9,8 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Proves that every release is additive: every type of the 2.8.6 and 2.9.0
- * snapshots still exists with exactly the same public API.
+ * Proves that every release is additive: every type of the 2.8.6, 2.9.0
+ * and 2.10.0 snapshots still exists with exactly the same public API.
  *
  * Inherited types are frozen as a whole. A new method, parameter or parent
  * interface on an inherited interface would break its implementers, so it
@@ -18,13 +18,14 @@ use PHPUnit\Framework\TestCase;
  *
  * Each fixture was captured by Reflection with dump-api.php before the next
  * release changed anything: 2.8.6 from the untouched Packagist dist, 2.9.0
- * from its release tarball. Docblocks are not part of them.
+ * and 2.10.0 from their release tarballs. Docblocks are not part of them.
  */
 final class BackwardCompatibilityTest extends TestCase
 {
     private const array RELEASES = [
         '2.8.6' => ['reference' => '35935418be93009a1ce389460e6fbf87353f0dd7', 'types' => 54],
         '2.9.0' => ['reference' => 'sha256:86b11923ea913650a8c4a3e877be4c734057ace9b40d0e434ba985f1b2946217', 'types' => 59],
+        '2.10.0' => ['reference' => 'sha256:7197a54377da3aaee7d3c0f82f01ff0686e312cf08a8bd099ac6d9c39bc6cbb4', 'types' => 64],
     ];
 
     /**

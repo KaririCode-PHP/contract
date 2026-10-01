@@ -3,6 +3,29 @@
 All notable changes to `kariricode/contract` are documented here.
 The format follows Keep a Changelog; versions follow Semantic Versioning.
 
+## [2.10.1] — 2026-10-01
+
+Documentation and conformance only. **The API is unchanged**;
+`BackwardCompatibilityTest` now also guards the 2.10.0 API.
+
+### Changed
+
+- ADR-004 amended: the default `RetryPolicy` will be an adapter in
+  `kariricode/async-helper`, which already ships backoff strategies with full
+  jitter, so there will be no `kariricode/retry`; `kariricode/async`'s
+  `CircuitBreakerBridge` is listed as a `ManualCircuitBreaker` consumer; the
+  rate-limiter codes are RL-8300–8399.
+- The five resilience ports document their side effects (criterion C3 of
+  Spec V4.3.3 §17), and the conformance test checks criteria C2 to C5.
+- `composer.json` declares `extra.asvs` (OWASP ASVS 5.0, level 1), as gate
+  G4 requires; a conformance test checks both levels.
+- README, SPEC-001 and QD-V40-COMPLIANCE describe 2.10.1.
+
+### Added
+
+- The 2.10.0 API snapshot (`tests/Compatibility/fixtures/2.10.0.json`).
+- ADR-005 (proposed): shared cross-cutting contracts for 2.11.0.
+
 ## [2.10.0] — 2026-09-30
 
 Additive release (ADR-004). **There is no breaking change:** every type of

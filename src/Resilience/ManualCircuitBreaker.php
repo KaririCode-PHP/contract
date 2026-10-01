@@ -27,6 +27,11 @@ use Throwable;
  * identity, so one breaker serves concurrent calls. State kept in process
  * memory starts over on every PHP-FPM request.
  *
+ * Side effects: acquiring may write circuit state (an admission can move
+ * an open circuit to half-open and reserve a trial); recordSuccess() and
+ * recordFailure() write the outcome; releasePermit() frees the trial.
+ * Implementations typically dispatch one event per outcome.
+ *
  * Example:
  *
  *     $permit = $breaker->tryAcquirePermit();

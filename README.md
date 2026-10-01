@@ -84,7 +84,7 @@ final readonly class ExchangeRates
 | `Resilience\CallPermit` (2.10.0) | none: opaque proof of one admitted call | circuit-breaker's `Core\CallPermit` |
 | `Resilience\RateLimiter` (2.10.0) | `attempt(string $key, int $cost = 1)`, `peek(string $key)`, `reset(string $key)` | `kariricode/rate-limiter` 4.0.0 |
 | `Resilience\RateLimitDecision` (2.10.0) | get-only `bool $allowed`, `int $limit`, `int $remaining`, `int $retryAfter`, `int $resetAfter` | rate-limiter's `RateLimitResult` |
-| `Resilience\RetryPolicy` (2.10.0) | `shouldRetry(Throwable $error, int $attempt): bool`, `delayMilliseconds(Throwable $error, int $attempt): int` | none yet (`kariricode/retry` planned) |
+| `Resilience\RetryPolicy` (2.10.0) | `shouldRetry(Throwable $error, int $attempt): bool`, `delayMilliseconds(Throwable $error, int $attempt): int` | none yet; planned as an adapter in `kariricode/async-helper` (ADR-004 amendment) |
 
 - `execute()` runs the operation only when the call is admitted and returns
   its result; an exception thrown by the operation is rethrown unchanged. A
@@ -215,10 +215,10 @@ final readonly class QueueConfigProvider implements ConfigProvider
 
 ## Inherited Contracts
 
-The 54 types of 2.8.6, and the five added in 2.9.0, keep their names,
-namespaces and signatures. `tests/Compatibility` compares them with
-Reflection snapshots of the 2.8.6 dist and of the 2.9.0 release; any
-difference in an earlier type fails.
+The 54 types of 2.8.6, the five added in 2.9.0 and the five added in 2.10.0
+keep their names, namespaces and signatures. `tests/Compatibility` compares
+them with Reflection snapshots of the 2.8.6 dist and of the 2.9.0 and
+2.10.0 releases; any difference in an earlier type fails.
 
 | Namespace | Purpose |
 |---|---|
@@ -278,8 +278,9 @@ The Spec V4.0 rules checked by `tests/Conformance/ArfaConformanceTest`:
 interfaces only, no `Interface`/`Manager`/`Helper`/`Util` names, no getters
 without parameters, no `toArray()`/`jsonSerialize()`, one type per file named
 after it, typed constants, no hooks in readonly types (E-013), no authorship
-tags in docblocks, no runtime dependency; for the 2.10.0 ports, the E-005
-docblock criteria and synchronous signatures. The quality record is **PENDING**
+tags in docblocks, no runtime dependency, ARFA and ASVS levels declared;
+for the 2.10.0 ports, documentation criteria C1–C5 (Spec V4.3.3 §17) and
+synchronous signatures. The quality record is **PENDING**
 until the gates run in CI.
 
 ## Ecosystem Position
@@ -287,9 +288,9 @@ until the gates run in CI.
 ```
  implemented by                     contract                  consumed by
  circuit-breaker 4.0.0 ───────────▶ CircuitBreaker      ◀─── dataflow, observability, processor-pipeline
-                                    ManualCircuitBreaker ◀── processor-pipeline, dataflow (async stages)
+                                    ManualCircuitBreaker ◀── processor-pipeline, dataflow (async stages), async
  rate-limiter 4.0.0 ──────────────▶ RateLimiter         ◀─── processor-pipeline, observability, dataflow, authenticator
- kariricode/retry (planned) ──────▶ RetryPolicy         ◀─── processor-pipeline; dataflow, observability (optional)
+ async-helper (planned adapter) ──▶ RetryPolicy         ◀─── processor-pipeline, queue; dataflow, observability
  dotenv, configurator ────────────▶ Environment         ◀─── configurator (interpolation)
  components, configurator ────────▶ Configuration       ◀─── configurator (builder, value chain)
  configurator (ConfigurationProcessor) ─▶ Processor     ◀─── processor-pipeline (registry)
@@ -317,15 +318,15 @@ docs/adr/  docs/spec/  docs/quality/
 
 - The package depends on PHP only; every other package depends on it, never
   the reverse.
-- The API snapshots (`tests/Compatibility/fixtures/2.8.6.json` and
-  `2.9.0.json`) were captured by Reflection before the next release changed
-  anything; `dump-api.php` regenerates them.
+- The API snapshots (`tests/Compatibility/fixtures/2.8.6.json`,
+  `2.9.0.json` and `2.10.0.json`) were captured by Reflection before the next
+  release changed anything; `dump-api.php` regenerates them.
 - Inherited source and tests are frozen: PHP CS Fixer skips them, and the
   PHPStan and Psalm baselines hold only findings in inherited files.
 
 ## Metrics
 
-Measured on 2026-09-30 in a local sandbox with PHP 8.4.23, not in CI.
+Measured on 2026-10-01 in a local sandbox with PHP 8.4.23, not in CI.
 
 | Metric | Value |
 |---|---|
@@ -333,7 +334,7 @@ Measured on 2026-09-30 in a local sandbox with PHP 8.4.23, not in CI.
 | Public methods | 157 (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0); interface properties: 6 |
 | PHP lines in `src/` | 2,631 (258 new in 2.10.0) |
 | Runtime dependencies | 0 |
-| Tests | 217 tests, 3,795 assertions, all passing |
+| Tests | 220 tests, 3,810 assertions, all passing |
 | PHPStan (level max) | 0 errors; baseline of 46 findings in 17 inherited files |
 | Psalm (error level 2) | 0 errors; baseline of 10 findings in 6 inherited files |
 | Psalm (error level 1, strict) | 0 errors, no baseline, over the source added since 2.9.0 (`composer psalm-strict`) |

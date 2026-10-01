@@ -22,6 +22,10 @@ namespace KaririCode\Contract\Resilience;
  * (Redis) and decide atomically, so every worker shares one quota. State
  * kept in process memory starts over on every PHP-FPM request.
  *
+ * Side effects: attempt() writes the key's state when it admits and
+ * nothing when it denies; peek() writes nothing; reset() deletes the
+ * key's state. Implementations may dispatch one event per attempt().
+ *
  * Example:
  *
  *     $decision = $limiter->attempt('stage:enrich');

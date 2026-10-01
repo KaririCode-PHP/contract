@@ -1,6 +1,6 @@
 # ADR-004: Resilience ports
 
-- **Status:** Accepted
+- **Status:** Accepted; amended 2026-10-01 (see the end)
 - **Date:** 2026-09-30
 - **Component:** kariricode/contract 2.10.0
 - **Authors:** Walmir Silva <walmir.silva@kariricode.org>
@@ -200,3 +200,33 @@ Correspondence with ARFA 1.3 §4.4.2:
   E-005, E-009.
 - `kariricode/circuit-breaker` 4.0.0, SPEC-001 §2 and §8;
   `kariricode/rate-limiter` 4.0.0, SPEC-001 §3 and `contract-proposal/README.md`.
+
+## Amendment — 2026-10-01 (2.10.1)
+
+A review of the other component records found facts this ADR did not have.
+The interfaces do not change; the corrections concern implementations,
+consumers and codes.
+
+1. **A retry implementation exists.** `kariricode/async-helper` 4.0 ships
+   `Contract\BackoffStrategy` (`calculateDelay(int $attempt): int`, in
+   milliseconds), `Contract\RetryStrategy` (`execute(callable $operation,
+   int $maxAttempts = 3): mixed`) and four strategies, among them
+   `Retry\JitteredBackoff` with full, equal and decorrelated jitter; Queue
+   already uses it. Decision 7 changes accordingly: the default
+   `RetryPolicy` is an adapter in async-helper that classifies the error and
+   takes the delay from a `BackoffStrategy`. There will be no
+   `kariricode/retry`. DataFlow and Observability adopt that policy instead
+   of their own loops. Async-helper's interfaces need their own Spec V4.3.3
+   pass first (parameterless getters such as `getMaxDelay()`, `@package`
+   tags).
+2. **A fourth breaker consumer.** `kariricode/async`'s
+   `Integration\CircuitBreakerBridge` receives the breaker as `object` and
+   returns a promise. That is the asynchronous case `ManualCircuitBreaker`
+   was designed for: acquire a permit, settle it when the promise settles.
+3. **Rate-limiter codes.** rate-limiter 4.0.0 moved to the ecosystem range
+   RL-8300–8399: RL-8300 invalid value (cost below 1 included), RL-8301 cost
+   above capacity, RL-8310–8312 store unavailable, RL-8320 unknown limiter.
+   Earlier notes that cite RL-4290–4299 are void.
+4. **Documentation criteria.** Spec V4.3.3 §17 defines C3 as side effects;
+   thread-safety now belongs to C2. The port docblocks state their side
+   effects, and the conformance test checks C2 to C5.

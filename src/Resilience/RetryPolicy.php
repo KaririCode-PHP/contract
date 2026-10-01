@@ -23,6 +23,9 @@ use Throwable;
  * Randomised delays (jitter) are expected. On PHP-FPM the caller's wait
  * blocks the worker: keep attempts few and delays capped.
  *
+ * Side effects: none; the policy only decides, and the caller waits and
+ * calls again.
+ *
  * Example:
  *
  *     for ($attempt = 1; ; ++$attempt) {

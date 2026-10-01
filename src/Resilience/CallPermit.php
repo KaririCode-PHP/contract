@@ -19,6 +19,9 @@ namespace KaririCode\Contract\Resilience;
  * Thread-safety: a permit belongs to one call; never share it between
  * concurrent calls.
  *
+ * Side effects: none of its own; settling it through the breaker writes
+ * circuit state.
+ *
  * Example: `$permit = $breaker->tryAcquirePermit() ?? throw new StageSkipped($stage);`
  *
  * References: Resilience4j, "CircuitBreaker" (permissions); Kleppmann,
