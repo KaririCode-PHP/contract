@@ -1,8 +1,8 @@
-# QD-V40 Compliance — kariricode/contract 2.11.0
+# QD-V40 Compliance — kariricode/contract 2.12.0
 
 - **Status: PENDING**
-- **Date:** 2026-10-01
-- **Component:** kariricode/contract 2.11.0
+- **Date:** 2026-10-27
+- **Component:** kariricode/contract 2.12.0
 - **Authors:** Walmir Silva <walmir.silva@kariricode.org>
 
 The package is not compliant until the gates below pass in the project's
@@ -18,7 +18,7 @@ not the verdict (E-006).
 | Syntax | `php -l` on every PHP file | pending |
 | Inherited 2.8.6 tests | `composer test-inherited` | pending |
 | Unit tests of the contracts added since 2.9.0 | `composer test-unit` | pending |
-| Backward compatibility with 2.8.6, 2.9.0 and 2.10.0 | `composer test-compatibility` | pending |
+| Backward compatibility with 2.8.6, 2.9.0, 2.10.0 and 2.11.0 | `composer test-compatibility` | pending |
 | ARFA 1.3 / Spec V4.3.3 conformance, levels declared (G4) | `composer test-conformance` | pending |
 | PHPStan, level max (baseline: inherited files only) | `composer phpstan` | pending |
 | Psalm, error level 2 (baseline: inherited files only) | `composer psalm` | pending |
@@ -31,17 +31,18 @@ not the verdict (E-006).
 ## 2. Blocking prerequisites
 
 1. A first green run of `.github/workflows/ci.yml` on GitHub.
-2. Signed tags (`git tag -s`) for 2.9.0, 2.10.0, 2.10.1 and 2.11.0, in that
-   order, or only for the latest; `^2.9`, `^2.10` and `^2.11` all accept
-   2.11.0.
+2. Signed tags (`git tag -s`) for 2.9.0, 2.10.0, 2.10.1, 2.11.0 and 2.12.0,
+   in that order, or only for the latest; `^2.9` to `^2.12` all accept
+   2.12.0. None of them is tagged yet; the latest tag is v2.8.6.
 3. rate-limiter 4.0.0 must drop `contract-proposal/` before it is installed
    together with this package: two autoload entries for
    `KaririCode\Contract\Resilience\` would load whichever comes first.
 
 ## 3. Local evidence (not CI)
 
-Measured 2026-10-01 in an isolated sandbox, with the toolchain of the
-committed lock file.
+Measured 2026-10-27 in an isolated sandbox, with the toolchain of the
+committed lock file. PHPStan 2.2.16 ran from its phar at the locked commit,
+because the sandbox could not download its dist archive.
 
 | Item | Version |
 |---|---|
@@ -55,11 +56,14 @@ committed lock file.
 |---|---|
 | `composer validate --strict` | valid; the lock file matches `composer.json` |
 | `php -l` | no syntax errors in any PHP file |
-| PHPUnit, four suites | 260 tests, 3,938 assertions, all passing: inherited 160/393, unit 76/3,408, compatibility 8/45, conformance 16/92 |
+| PHPUnit, four suites | 287 tests, 4,001 assertions, all passing: inherited 160/393, unit 101/3,452, compatibility 10/56, conformance 16/100 |
 | PHPStan level max | 0 errors; the baseline still holds the same 46 findings in 17 inherited files |
 | Psalm error level 2 | 0 errors; the baseline still holds the same 10 findings in 6 inherited files; `DeprecatedInterface` is suppressed only in `DI/Compiler.php` and `DI/Provider.php`, where the deprecated types reference each other |
 | Psalm error level 1, `psalm-strict.xml` | 0 errors, without baseline, in the source added since 2.9.0. Over test code, level 1 reports 23 findings, all in test helpers first written for 2.9.0 (open item 9) |
-| PHP CS Fixer, dry run | 0 of 64 files in scope to fix; inherited code is out of scope |
+| PHP CS Fixer, dry run | 0 of 91 files in scope to fix; inherited code is out of scope |
+| New tests and fixtures (`tests/Unit/Inspection`) | PHPStan level max: 0 errors; Psalm error level 1: 0 findings (the 23 of open item 9 are unchanged) |
+| Mutations of the 2.12.0 types | each fails its rule: no `Side effects:` → `theTypesAddedSince210DocumentTheFiveCriteria`; a `getRules()` → `noGetterWithoutParameters`; a `\Generator` return → `theTypesAddedSince210AreSynchronousInterfaces`; an `http://` `@see` → the C5 check; skipping the parent walk in the applier fixture, or wrapping handler exceptions in the inspector fixture → unit failures |
+| Review by the first implementation | property-inspector 3.0 (`release/3.0.0`, `db76ea7`) found that the applier fixture wrote a property a subclass redeclares once per declaring class, which fails on a readonly property. The fixture now writes each storage slot once; `aPropertyRedeclaredByASubclassIsWrittenOnce`, `aParentsPrivatePropertyNamedLikeAChildPropertyIsItsOwnSlot` and `anEnumCannotBeCopied` fail against the old fixture and pass against the new one |
 | `composer security` | no security vulnerability advisories found |
 | `composer sbom` | CycloneDX 1.5: 0 runtime and 95 development components |
 | Rate-limiter signatures | `RateLimiter` and `RateLimitDecision` have the same Reflection API as rate-limiter 4.0.0's `contract-proposal/` |
@@ -72,7 +76,10 @@ committed lock file.
   findings sit in the baselines and the fixer skips them.
 - The compatibility test covers what Reflection sees; see SPEC-001 §12.
 - The semantics of `RetryPolicy` and of the 2.11.0 families rest on unit
-  fixtures: no library implements them yet.
+  fixtures: no library implements them yet. The 2.12.0 inspection contracts
+  are implemented on property-inspector's `release/3.0.0` branch
+  (`db76ea7`), not yet released; that review found the fixture defect of
+  §3 (a redeclared property written twice), fixed before publication.
 - `asvs.level` is 1 because the package has no runtime code of its own; the
   declaration exists for gate G4.
 
@@ -135,3 +142,10 @@ Each item needs a breaking change and a migration of the dependents
     carry the C1–C5 markers yet.
 11. **Traceability:** the libraries' file and line references could not be
     checked against their tarballs; ADR-004 cites their design records.
+12. **Migrations of 2.12.0** (SPEC-001 §8.6): property-inspector 3.0.0
+    implements `PropertyInspector` and `PropertyChangeApplier`; sanitizer,
+    transformer, serializer and validator replace their `require` on
+    property-inspector with kariricode/contract `^2.12`, and return the copy
+    instead of updating the caller's object. property-inspector 3.0.0 adds
+    `anExceptionFromAGetHookPropagatesUnchanged`, the one semantic test of
+    SPEC-001 §2.4 its suite lacks.

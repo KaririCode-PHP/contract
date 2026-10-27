@@ -33,6 +33,7 @@ final class ArfaConformanceTest extends TestCase
         'KaririCode\\Contract\\Context\\',
         'KaririCode\\Contract\\Environment\\',
         'KaririCode\\Contract\\Exception\\',
+        'KaririCode\\Contract\\Inspection\\',
         'KaririCode\\Contract\\Resilience\\',
         'KaririCode\\Contract\\Security\\',
     ];
@@ -51,6 +52,9 @@ final class ArfaConformanceTest extends TestCase
         'KaririCode\\Contract\\Exception\\Protocol',
         'KaririCode\\Contract\\Exception\\Runtime',
         'KaririCode\\Contract\\Exception\\Validation',
+        'KaririCode\\Contract\\Inspection\\PropertyAttributeHandler',
+        'KaririCode\\Contract\\Inspection\\PropertyChangeApplier',
+        'KaririCode\\Contract\\Inspection\\PropertyInspector',
         'KaririCode\\Contract\\Resilience\\CallNotPermittedException',
         'KaririCode\\Contract\\Resilience\\CallPermit',
         'KaririCode\\Contract\\Resilience\\CircuitBreaker',
@@ -96,6 +100,9 @@ final class ArfaConformanceTest extends TestCase
         \KaririCode\Contract\Resilience\RateLimitDecision::class,
         \KaririCode\Contract\Resilience\RateLimiter::class,
         \KaririCode\Contract\Resilience\RetryPolicy::class,
+        \KaririCode\Contract\Inspection\PropertyAttributeHandler::class,
+        \KaririCode\Contract\Inspection\PropertyChangeApplier::class,
+        \KaririCode\Contract\Inspection\PropertyInspector::class,
     ];
 
     private const array INHERITED_DEVIATIONS = [
@@ -415,7 +422,7 @@ final class ArfaConformanceTest extends TestCase
             $contents = (string) file_get_contents(self::ROOT . '/' . $baseline);
             self::assertNotSame('', $contents, $baseline);
 
-            foreach (['src/Resilience/', 'src/Environment/', 'src/Configuration/'] as $newDirectory) {
+            foreach (['src/Resilience/', 'src/Environment/', 'src/Configuration/', 'src/Inspection/'] as $newDirectory) {
                 self::assertStringNotContainsString($newDirectory, $contents, $baseline);
             }
         }

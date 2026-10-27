@@ -13,6 +13,7 @@
         <directory name="src/Context"/>
         <directory name="src/Environment"/>
         <directory name="src/Exception"/>
+        <directory name="src/Inspection"/>
         <directory name="src/Resilience"/>
         <directory name="src/Security"/>
         <file name="src/DI/BindableContainer.php"/>

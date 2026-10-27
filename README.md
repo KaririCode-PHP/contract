@@ -33,14 +33,16 @@ The package follows four rules:
 4.0.0 and the environment and configuration contracts of Configurator
 ADR-007. 2.10.0 added the resilience ports a processor pipeline composes:
 rate limiting (`kariricode/rate-limiter` 4.0.0), the manual permit protocol
-of the circuit breaker, and retry policies (ADR-004). 2.11.0 adds the
+of the circuit breaker, and retry policies (ADR-004). 2.11.0 added the
 cross-cutting contracts the Spec requires (ADR-005) and a verifiable supply
-chain (ADR-006).
+chain (ADR-006). 2.12.0 adds the property inspection contracts that the
+data-processing components share with `kariricode/property-inspector`
+(ADR-007).
 
 ## Installation
 
 ```bash
-composer require kariricode/contract:^2.11
+composer require kariricode/contract:^2.12
 ```
 
 Since 2.9.0 the package requires PHP 8.4 or newer, because interfaces
@@ -246,12 +248,42 @@ $identity = $context->find(Identity::class);     // any component that decides
 $context->clear();                               // runtime, end of request
 ```
 
+## Property Inspection
+
+Three contracts added in 2.12.0 (ADR-007), promoted from
+`kariricode/property-inspector` so that the data-processing components
+(sanitizer, validator, transformer, serializer) read the attributes of a
+DPO and write the results back without depending on that package.
+
+| Interface | Role |
+|---|---|
+| `Inspection\PropertyInspector` | `inspect($object, $attributeClass, $handler)`: hands each property carrying a matching attribute to the handler, with the attribute and the current value; one instance serves every processor |
+| `Inspection\PropertyAttributeHandler` | `handleAttribute($propertyName, $attribute, $value)`: the processor's side; what it accumulates is read through the processor's own API |
+| `Inspection\PropertyChangeApplier` | `applyChanges($object, $changes)`: returns a new instance with the changes and leaves the original untouched, so readonly DPOs work (ARFA 1.3 P1) |
+
+```php
+$inspector->inspect($signUp, Sanitize::class, $rules);           // $rules is a PropertyAttributeHandler
+$result = $engine->sanitize($rules->values, $rules->rules);
+$clean = $applier->applyChanges($signUp, $result->sanitizedData); // a copy; validate it next
+```
+
+- Inspection never writes to the object. Its own failures are
+  `Exception\Runtime`; an exception thrown by the handler, or by a get or
+  set hook of the object, reaches the caller unchanged, so a `Validation` is
+  still a 422.
+- The copy does not run the constructor, so validation comes after it.
+  Unchanged properties are copied as stored, without set hooks, each
+  storage slot once (a redeclared property is one slot, a parent's private
+  property its own); changed ones are assigned, so their set hooks run.
+- `AttributeAnalyzer`, `PropertyAccessor` and the 2.x handler getters stay
+  in property-inspector: no other package needs them (ADR-007).
+
 ## Inherited Contracts
 
-The 54 types of 2.8.6, the five added in 2.9.0 and the five added in 2.10.0
-keep their names, namespaces and signatures. `tests/Compatibility` compares
-them with Reflection snapshots of the 2.8.6 dist and of the 2.9.0 and
-2.10.0 releases; any difference in an earlier type fails. A type may gain a supertype only when
+The 54 types of 2.8.6 and those added in 2.9.0, 2.10.0 and 2.11.0 keep
+their names, namespaces and signatures. `tests/Compatibility` compares them
+with Reflection snapshots of the 2.8.6 dist, of the 2.9.0 and 2.10.0
+releases and of the 2.11.0 commit; any difference in an earlier type fails. A type may gain a supertype only when
 the supertype brings no member (`CallNotPermittedException` gained
 `Exception\Runtime` that way). Since 2.11.0, `DI\Provider`,
 `DI\Container`, `DI\Definition` and `DI\Compiler` are deprecated, for
@@ -277,7 +309,7 @@ it (the case since 2.8.6). Do not type against it.
 
 ## All Contracts
 
-76 types in 20 namespaces; the full signatures are in SPEC-001 §3.
+79 types in 21 namespaces; the full signatures are in SPEC-001 §3.
 
 | Namespace | Types | Since |
 |---|---|---|
@@ -290,6 +322,7 @@ it (the case since 2.8.6). Do not type against it.
 | `DataStructure\Structural` | `BPlusTreeCollection`, `Collection`, `Serializable` | ≤ 2.8.6 |
 | `Environment` | `EnvironmentResolver` | 2.9.0 |
 | `Exception` | `Configuration`, `ContainerFailure`, `ExceptionInterface`, `NotFound`, `Protocol`, `Runtime`, `Validation` | 2.11.0 |
+| `Inspection` | `PropertyAttributeHandler`, `PropertyChangeApplier`, `PropertyInspector` | 2.12.0 |
 | `Logging` | `LogFormatter`, `LogHandler`, `LogLevel`, `LogProcessor`, `LogRotator`, `Logger`, `LoggerExtendedInterface`, `LoggingManager` | ≤ 2.8.6 |
 | `Logging\Behavioral` | `Configurable`, `Loggable`, `LoggerConfigurable` | ≤ 2.8.6 |
 | `Logging\Structural` | `ContextAware`, `FormatterAware`, `HandlerAware`, `LoggerAware`, `ProcessorAware` | ≤ 2.8.6 |
@@ -308,7 +341,7 @@ Conformance level 1 (`extra.arfa` in `composer.json`).
 
 | Principle | In this package |
 |---|---|
-| P1 Immutable State Transformation | contracts declare no mutable state; the one property is read-only (`{ get; }`) |
+| P1 Immutable State Transformation | contracts declare no mutable state; properties are read-only (`{ get; }`); `PropertyChangeApplier` returns a copy instead of writing in place |
 | P2 Reactive Flow Composition | not required at level 1; contracts are synchronous, asynchronous composition lives in `KaririCode\Async` |
 | P3 Adaptive Context Awareness | not required at level 1; `CallNotPermittedException` lets callers choose their fallback |
 | P4 Protocol Agnosticism | no transport types: a rejection carries seconds, not an HTTP status |
@@ -340,6 +373,9 @@ until the gates run in CI.
  dotenv, configurator ────────────▶ Environment         ◀─── configurator (interpolation)
  components, configurator ────────▶ Configuration       ◀─── configurator (builder, value chain)
  configurator (ConfigurationProcessor) ─▶ Processor     ◀─── processor-pipeline (registry)
+ property-inspector 3.0 (planned) ─▶ Inspection\PropertyInspector,
+                                    Inspection\PropertyChangeApplier ◀─ sanitizer, transformer, serializer, validator
+ the processors' handlers ────────▶ Inspection\PropertyAttributeHandler ◀─ property-inspector
 ```
 
 Cache and events between packages go through PSR-16 and PSR-14, not
@@ -348,8 +384,8 @@ through this package (ADR-001).
 On Packagist, checked 2026-09-30, the latest tagged version of each
 `kariricode/*` package that requires the contract asks for `^2.0` to `^2.8`:
 data-structure `^2.0`, configurator and logging `^2.6`, validator `^2.7`,
-processor-pipeline and property-inspector `^2.8`. 2.11.0 satisfies all of
-them on PHP 8.4. Migration of the consumers: SPEC-001 §8.
+processor-pipeline and property-inspector `^2.8`. 2.11.0 and 2.12.0 satisfy
+all of them on PHP 8.4. Migration of the consumers: SPEC-001 §8.
 
 ## Architecture
 
@@ -365,8 +401,8 @@ docs/adr/  docs/spec/  docs/quality/
 - The package depends on PHP only; every other package depends on it, never
   the reverse.
 - The API snapshots (`tests/Compatibility/fixtures/2.8.6.json`,
-  `2.9.0.json` and `2.10.0.json`) were captured by Reflection before the next
-  release changed anything; `dump-api.php` regenerates them.
+  `2.9.0.json`, `2.10.0.json` and `2.11.0.json`) were captured by Reflection
+  before the next release changed anything; `dump-api.php` regenerates them.
 - Inherited source and tests are frozen: PHP CS Fixer skips them, and the
   PHPStan and Psalm baselines hold only findings in inherited files.
 
@@ -376,16 +412,16 @@ docs/adr/  docs/spec/  docs/quality/
 
 ## Metrics
 
-Measured on 2026-10-01 in a local sandbox with PHP 8.4.23 and the locked
+Measured on 2026-10-27 in a local sandbox with PHP 8.4.23 and the locked
 toolchain, not in CI.
 
 | Metric | Value |
 |---|---|
-| Types | 76 (75 interfaces, 1 inherited abstract class), 20 namespaces |
-| Public methods | 172 (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0, 15 from 2.11.0); interface properties: 10 |
-| PHP lines in `src/` | 3,113 (443 new in 2.11.0) |
+| Types | 79 (78 interfaces, 1 inherited abstract class), 21 namespaces |
+| Public methods | 175 (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0, 15 from 2.11.0, 3 from 2.12.0); interface properties: 10 |
+| PHP lines in `src/` | 3,285 (172 new in 2.12.0) |
 | Runtime dependencies | 0 |
-| Tests | 260 tests, 3,938 assertions, all passing |
+| Tests | 287 tests, 4,001 assertions, all passing |
 | PHPStan (level max) | 0 errors; baseline of 46 findings in 17 inherited files |
 | Psalm (error level 2) | 0 errors; baseline of 10 findings in 6 inherited files |
 | Psalm (error level 1, strict) | 0 errors, no baseline, over the source added since 2.9.0 (`composer psalm-strict`) |

@@ -1,15 +1,15 @@
-# SPEC-001: kariricode/contract 2.11.0
+# SPEC-001: kariricode/contract 2.12.0
 
 | Field | Value |
 |---|---|
 | Status | Accepted (content); quality gate PENDING — see QD-V40-COMPLIANCE |
 | Date | 2026-09-30 |
-| Component | kariricode/contract 2.11.0 |
+| Component | kariricode/contract 2.12.0 |
 | Authors | Walmir Silva <walmir.silva@kariricode.org> |
 | Standards | ARFA 1.3 (level 1); KaririCode Code Quality Directive V4.0 |
 | Error codes | none: the package declares interfaces and throws nothing |
 | PHP | ^8.4 |
-| Base | 2.8.6 Packagist dist, reference `35935418be93009a1ce389460e6fbf87353f0dd7`; 2.9.0 release tarball, SHA-256 `86b11923ea913650a8c4a3e877be4c734057ace9b40d0e434ba985f1b2946217`; 2.10.0 release tarball, SHA-256 `7197a54377da3aaee7d3c0f82f01ff0686e312cf08a8bd099ac6d9c39bc6cbb4` |
+| Base | 2.8.6 Packagist dist, reference `35935418be93009a1ce389460e6fbf87353f0dd7`; 2.9.0 release tarball, SHA-256 `86b11923ea913650a8c4a3e877be4c734057ace9b40d0e434ba985f1b2946217`; 2.10.0 release tarball, SHA-256 `7197a54377da3aaee7d3c0f82f01ff0686e312cf08a8bd099ac6d9c39bc6cbb4`; 2.11.0 commit `62dea5b1b093720292596fface927dac92d7a2ea` on main |
 
 ## 1. Scope
 
@@ -18,8 +18,9 @@ so that one package implements a contract and others type against it
 without depending on each other (ADR-001). 2.9.0 added five interfaces to
 the 2.8.6 package (ADR-002, ADR-003); 2.10.0 adds five resilience ports
 (ADR-004); 2.10.1 changed documentation and tests only; 2.11.0 adds the
-cross-cutting contracts of ADR-005 and the supply chain of ADR-006. No type
-of an earlier release lost or changed a member; `CallNotPermittedException`
+cross-cutting contracts of ADR-005 and the supply chain of ADR-006; 2.12.0
+adds the property inspection contracts of ADR-007. No type of an earlier
+release lost or changed a member; `CallNotPermittedException`
 gained the member-free supertype `Exception\Runtime` (§4).
 
 ## 2. API Added Since 2.8.6
@@ -211,12 +212,38 @@ interface SerializableData {}
 | `ContextStorage` | slots keyed by the named type; empty slot reads null; `store()` replaces; `clear()` empties; one context per fiber | `ContextStorageTest` |
 | `SerializableData` | public readonly properties are the JSON form, nested included; a pure enum breaks the precondition | `SerializableDataTest` |
 
+### 2.4 In 2.12.0 (ADR-007)
+
+```php
+namespace KaririCode\Contract\Inspection;
+interface PropertyInspector
+{
+    public function inspect(object $object, string $attributeClass, PropertyAttributeHandler $handler): void;  // class-string
+}
+interface PropertyAttributeHandler
+{
+    public function handleAttribute(string $propertyName, object $attribute, mixed $value): void;
+}
+interface PropertyChangeApplier
+{
+    public function applyChanges(object $object, array $changes): object;  // @template T: T in, T out
+}
+```
+
+| Member | Semantics | Verified by |
+|---|---|---|
+| `inspect()` | one `handleAttribute()` per attribute that is an instance of `$attributeClass` (subclasses and implementers included), in declaration order per property; own properties of any visibility plus inherited public and protected ones, never a parent's private property nor a static one; the value read during the call | `everyMatchingAttributeReachesTheHandlerInDeclarationOrder`, `anInterfaceMatchesEveryAttributeThatImplementsIt`, `inheritedProtectedPropertiesAreInspectedButAParentsPrivateOnesAreNot`, `staticPropertiesAreNotInspected`, `theHandlerReceivesTheValueHeldDuringTheCall` |
+| `inspect()` failures | never writes to the object; an uninitialized annotated property or an attribute that cannot be built is a `Runtime` fault raised before the handler runs; the handler's own exception, and a get hook's, reaches the caller unchanged | `inspectingNeverWritesToTheObject`, `anUninitializedAnnotatedPropertyIsARuntimeFault`, `anAttributeThatCannotBeInstantiatedIsARuntimeFaultRaisedBeforeTheHandlerRuns`, `anExceptionFromTheHandlerKeepsItsFamily`, `anExceptionFromAGetHookPropagatesUnchanged` |
+| `applyChanges()` | a new instance, also for no change; the original untouched, readonly included; unchanged state copied as stored and set hooks not run, each storage slot once (a redeclared property is one slot, a parent's private property its own); changes assigned, so set hooks run, an inherited protected property included; uninitialized stays uninitialized | `theCopyHoldsTheChangesAndTheReadonlyOriginalIsUntouched`, `anInheritedProtectedPropertyCanBeChanged`, `unchangedStateIsCopiedIncludingAParentsPrivateProperties`, `aPropertyRedeclaredByASubclassIsWrittenOnce`, `aParentsPrivatePropertyNamedLikeAChildPropertyIsItsOwnSlot`, `aChangeRunsTheSetHookAndACopiedValueDoesNot`, `anUninitializedPropertyStaysUninitializedUnlessChanged`, `anEmptyChangeSetStillYieldsANewEqualInstance` |
+| `applyChanges()` failures | an unknown, static or parent's private name, a value of the wrong type, or an object reflection cannot instantiate (an enum) is a `Runtime` fault; a set hook's exception reaches the caller unchanged | `anUnknownPropertyIsARuntimeFault`, `aStaticPropertyCannotBeChanged`, `aParentsPrivatePropertyCannotBeNamed`, `aValueOfTheWrongTypeIsARuntimeFault`, `anEnumCannotBeCopied`, `anExceptionFromASetHookPropagatesUnchanged` |
+| together | inspect, process, apply: a readonly DPO comes back sanitized as a new instance | `aReadonlyDpoIsSanitizedByInspectingThenApplyingACopy` |
+
 ## 3. Inventory
 
-76 types in 20 namespaces: 75 interfaces and one inherited abstract class.
-172 public methods (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0, 15 from
-2.11.0) and ten interface properties (one from 2.9.0, five from 2.10.0, four
-from 2.11.0).
+79 types in 21 namespaces: 78 interfaces and one inherited abstract class.
+175 public methods (138 from 2.8.6, 9 from 2.9.0, 10 from 2.10.0, 15 from
+2.11.0, 3 from 2.12.0) and ten interface properties (one from 2.9.0, five
+from 2.10.0, four from 2.11.0).
 
 ### 3.1 Namespaces
 
@@ -231,6 +258,7 @@ from 2.11.0).
 | `DataStructure\Structural` | `BPlusTreeCollection`, `Collection`, `Serializable` | ≤ 2.8.6 |
 | `Environment` | `EnvironmentResolver` | 2.9.0 |
 | `Exception` | `Configuration`, `ContainerFailure`, `ExceptionInterface`, `NotFound`, `Protocol`, `Runtime`, `Validation` | 2.11.0 |
+| `Inspection` | `PropertyAttributeHandler`, `PropertyChangeApplier`, `PropertyInspector` | 2.12.0 |
 | `Logging` | `LogFormatter`, `LogHandler`, `LogLevel`, `LogProcessor`, `LogRotator`, `Logger`, `LoggerExtendedInterface`, `LoggingManager` | ≤ 2.8.6 |
 | `Logging\Behavioral` | `Configurable`, `Loggable`, `LoggerConfigurable` | ≤ 2.8.6 |
 | `Logging\Structural` | `ContextAware`, `FormatterAware`, `HandlerAware`, `LoggerAware`, `ProcessorAware` | ≤ 2.8.6 |
@@ -328,6 +356,14 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 | `Protocol` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
 | `Runtime` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
 | `Validation` | 2.11.0 | interface | `Exception\ExceptionInterface` | — (marker) |
+
+**`Inspection`**
+
+| Type | Since | Kind | Extends | Members |
+|---|---|---|---|---|
+| `PropertyAttributeHandler` | 2.12.0 | interface | — | `handleAttribute(string $propertyName, object $attribute, mixed $value): void` |
+| `PropertyChangeApplier` | 2.12.0 | interface | — | `applyChanges(object $object, array $changes): object` |
+| `PropertyInspector` | 2.12.0 | interface | — | `inspect(object $object, string $attributeClass, Inspection\PropertyAttributeHandler $handler): void` |
 
 **`Logging`**
 
@@ -441,6 +477,9 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
   `86b11923…`) before 2.10.0 changed anything: 59 types.
 - **2.10.0 snapshot.** `tests/Compatibility/fixtures/2.10.0.json`, from the
   2.10.0 release tarball (SHA-256 `7197a543…`): 64 types.
+- **2.11.0 snapshot.** `tests/Compatibility/fixtures/2.11.0.json`, captured
+  from commit `62dea5b…` on main before 2.12.0 changed anything (2.11.0 had
+  no tag yet): 76 types.
 - **Supertypes.** A type may gain a supertype only when the supertype
   brings no method or property the type did not already have
   (`aSupertypeMayBeAddedOnlyWhenItBringsNoMember`). `CallNotPermittedException`
@@ -460,14 +499,14 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 ## 5. Naming and Accessors
 
 - Contracts are named after their role, without the `Interface` suffix
-  (ADR-003). The three ADR-007 contracts were renamed before their first
+  (ADR-003). The three Configurator ADR-007 contracts were renamed before their first
   publication and keep their method signatures exactly; no suffixed alias
   exists, because nothing can depend on a name never published.
 - A parameterless accessor is an interface property `{ get; }`:
   `CallNotPermittedException::$retryAfterSeconds` (2.9.0) and the five
   properties of `RateLimitDecision` (2.10.0). A `readonly` property satisfies
   them (§9).
-- None of the ADR-007 contracts declares a `get*` method without
+- None of the Configurator ADR-007 contracts declares a `get*` method without
   parameters. `namespace()`, `defaults()` and `schema()` are parameterless
   named queries and keep the signatures every Configurator provider
   implements (ADR-003 §3).
@@ -493,9 +532,9 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 | Suite | Directory | Result (local) | What it proves |
 |---|---|---|---|
 | `inherited` | `tests/DI`, `DataStructure`, `Logging`, `Processor`, `Sanitizer`, `Serializer`, `Transformer`, `Validator` | 160 tests, 393 assertions | the 2.8.6 tests run unchanged on PHPUnit 11.5 |
-| `unit` | `tests/Unit` | 76 tests, 3,408 assertions | a minimal implementation of each contract added since 2.9.0 behaves as §2 states; most assertions come from sampling retry delays |
-| `compatibility` | `tests/Compatibility` | 8 tests, 45 assertions | every 2.8.6, 2.9.0 and 2.10.0 type keeps its API; a supertype may be added only when it brings no member; the comparison detects differences |
-| `conformance` | `tests/Conformance` | 16 tests, 92 assertions | the rules of §10 over the whole `src/` tree; for the types added since 2.10.0, documentation criteria C1–C5 and synchronous signatures; exception markers; DI deprecations; ARFA and ASVS levels (G4) |
+| `unit` | `tests/Unit` | 101 tests, 3,452 assertions | a minimal implementation of each contract added since 2.9.0 behaves as §2 states; most assertions come from sampling retry delays |
+| `compatibility` | `tests/Compatibility` | 10 tests, 56 assertions | every 2.8.6, 2.9.0, 2.10.0 and 2.11.0 type keeps its API; a supertype may be added only when it brings no member; the comparison detects differences |
+| `conformance` | `tests/Conformance` | 16 tests, 100 assertions | the rules of §10 over the whole `src/` tree; for the types added since 2.10.0, documentation criteria C1–C5 and synchronous signatures; exception markers; DI deprecations; ARFA and ASVS levels (G4) |
 
 ## 8. Consumer Migration
 
@@ -503,7 +542,7 @@ Generated by Reflection from `src/`; `Extends` lists direct parents only.
 |---|---|---|---|
 | ProcessorPipeline | `^2.8` | `Processor\Processor`, `Processor\ConfigurableProcessor` | none |
 | Configurator 4.2 | `^4.1` → `^2.9` | `Environment`, `Configuration`, `Processor` | constraint and imports |
-| Dotenv (bridge of ADR-007) | `^4.1` → `^2.9` | `Environment` | constraint and imports |
+| Dotenv (bridge of Configurator ADR-007) | `^4.1` → `^2.9` | `Environment` | constraint and imports |
 | CircuitBreaker 4.0.0 | `^2.9` | `Resilience` (implements) | none; drop the path repository once 2.9.0 is tagged |
 | DataFlow, Observability | `^2.9` when they adopt it | `Resilience` | type the bridges against `CircuitBreaker` instead of `object` + `method_exists()` |
 
@@ -580,6 +619,15 @@ the literal copy (SHA-256 of `CircuitBreaker.php`
 | tenancy | the current `TenantContext` in `ContextStorage` instead of the mutable `TenantRegistry` |
 | circuit-breaker | nothing to do: `CircuitOpenException` becomes a `Runtime` through `CallNotPermittedException` |
 
+### 8.6 Property inspection (2.12.0)
+
+| Package | Today | With 2.12.0 | Change |
+|---|---|---|---|
+| property-inspector 3.0.0 | `Contract\AttributeAnalyzer`, `PropertyInspector`, `PropertyAttributeHandler`, `PropertyChangeApplier` of its own; in-place writes | implements `Inspection\PropertyInspector` and `Inspection\PropertyChangeApplier` | `inspect()` takes the attribute class and builds its `AttributeAnalyzer` internally; stop wrapping handler exceptions; copy-on-write applier (its ADR-006); failures implement `Exception\Runtime`; require `^2.12`; its 2.x line keeps the old interfaces |
+| sanitizer, transformer, serializer | require property-inspector `^2.0`; the handler implements both 2.x interfaces; `new AttributeAnalyzer(X::class)`; writes through `Utility\PropertyAccessor` | the handler implements `Inspection\PropertyAttributeHandler` only; inspector and applier injected as contracts | replace the `require` with kariricode/contract `^2.12`; `handleAttribute(): void` and drop the three getters; read the handler through its own properties; `$clean = $applier->applyChanges($dto, $processed)` and return the copy instead of updating the caller's object |
+| validator | property-inspector `^1.0`; reads `getProcessingResultErrors()` | handler as above | report errors through the validator's own result |
+| normalizer, mapper | not published | type against the contracts when they read attributes from objects | none until then |
+
 ## 9. Errata E-013 (proposed)
 
 **Problem.** Spec V4.0 allows `get` property hooks in `final readonly`
@@ -629,7 +677,7 @@ renumbering.
 | P3 Adaptive Context Awareness | not required at level 1; `CallNotPermittedException` lets callers choose a fallback | `CircuitBreakerTest` |
 | P4 Protocol Agnosticism | no transport data: a rejection carries seconds, not an HTTP status | `theContractAddsOnlyTheDelayToThrowable` |
 | P5 Continuous Observability | belongs to implementations; interfaces emit nothing | not applicable |
-| Interfaces only (or marker) | 58 interfaces; 1 inherited class listed | `onlyInterfacesAreDeclared` |
+| Interfaces only (or marker) | 78 interfaces; 1 inherited class listed | `onlyInterfacesAreDeclared` |
 | No `Interface` suffix, no `Manager` / `Helper` / `Util` | new names comply; 2 inherited listed | `namesCarryNoInterfaceSuffixNorVagueNoun` |
 | No getter without parameters | property `{ get; }` instead; 24 inherited listed | `noGetterWithoutParameters` |
 | E-001 no `toArray()` / `jsonSerialize()` | none new; 1 inherited listed | `noTypeSerializesItself` |
@@ -644,7 +692,8 @@ renumbering.
 | Static analysis | PHPStan max and Psalm 2: 0 errors in new code; inherited findings in baselines. Psalm 1 (strict, no baseline) over the source added since 2.9.0: 0 errors | `staticAnalysisBaselinesCoverInheritedFilesOnly`, `composer psalm-strict` |
 | Documentation criteria C1–C5 (Spec V4.3.3 §17) on the types added since 2.10.0 | preconditions and thread-safety (C2), side effects (C3), example (C4), references (C5) | `theTypesAddedSince210DocumentTheFiveCriteria` |
 | Level 1: nothing asynchronous | no promise, fiber or generator in the signatures of the types added since 2.10.0 | `theTypesAddedSince210AreSynchronousInterfaces` |
-| Additive over 2.9.0 and 2.10.0 | their APIs unchanged | `BackwardCompatibilityTest` (2.9.0 and 2.10.0 snapshots) |
+| Additive over 2.9.0, 2.10.0 and 2.11.0 | their APIs unchanged | `BackwardCompatibilityTest` (2.9.0, 2.10.0 and 2.11.0 snapshots) |
+| Property inspection (ADR-007) | inspection never writes; the applier copies, readonly DPOs included (P1); a handler's or hook's exception keeps its family (§8.4) | `PropertyInspectorTest`, `PropertyChangeApplierTest` |
 | Supertypes added without members | `CallNotPermittedException` gains `Exception\Runtime` | `aSupertypeMayBeAddedOnlyWhenItBringsNoMember` |
 | Exception families (§8.4) | markers without members under one root; the root keeps its suffix (E-035) | `theExceptionFamiliesAreMemberFreeMarkersUnderOneRoot`, `namesCarryNoInterfaceSuffixNorVagueNoun` |
 | Deprecations | the four inherited DI contracts name 2.11.0 and their removal in 3.0.0 | `theInheritedDiContractsAreDeprecatedForRemovalIn300` |
@@ -712,6 +761,18 @@ Other findings, outside the automated rules:
   their design records).
 - No library implements the 2.11.0 families yet; their semantics rest on
   the unit fixtures (`ArrayContainer`, `Principal`, `FiberContextStorage`).
+- property-inspector 3.0.0 implements the 2.12.0 inspection contracts on
+  its `release/3.0.0` branch (`db76ea7`), not yet released. Its suite runs 24
+  of the 25 semantic tests of §2.4 under the same names and lacks
+  `anExceptionFromAGetHookPropagatesUnchanged`, although its code already
+  lets a get hook's exception through. Its review found that the first
+  version of the `ReflectionChangeApplier` fixture wrote a property a
+  subclass redeclares once per declaring class, which fails on a readonly
+  property; the fixture now writes each storage slot once, and 2.12.0 was
+  not published with the defect.
+- The copy-on-write semantics were measured on PHP 8.4.23 only. A later
+  PHP release that changed readonly initialization through reflection
+  would show up as a failing `PropertyChangeApplierTest`.
 - The CI workflow has not run on GitHub yet; every gate result here is
   local.
 
@@ -740,3 +801,9 @@ Other findings, outside the automated rules:
 - RFC 9110, HTTP Semantics (§10.2.3, §15.5, §15.6).
 - OpenID Connect Core 1.0 §2; OpenTelemetry Specification, "Context"; PHP-FIG PSR-11.
 - OWASP CycloneDX Specification 1.5.
+- ADR-007 of this package; kariricode/property-inspector SPEC-001, ADR-006,
+  ADR-008 and ADR-009 (main, 2026-10-27).
+- PHP RFC "Readonly properties 2.0" and the PHP manual for
+  `ReflectionClass::newInstanceWithoutConstructor()`,
+  `ReflectionProperty::getAttributes()` and `ReflectionProperty::setRawValue()`.
+- Gamma, Helm, Johnson and Vlissides (1994), *Design Patterns* — Visitor.

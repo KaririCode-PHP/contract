@@ -3,6 +3,35 @@
 All notable changes to `kariricode/contract` are documented here.
 The format follows Keep a Changelog; versions follow Semantic Versioning.
 
+## [2.12.0] — 2026-10-27
+
+Additive release (ADR-007). **There is no breaking change:**
+`BackwardCompatibilityTest` now also checks the 2.11.0 API.
+
+### Added
+
+- `Inspection\PropertyInspector`, `Inspection\PropertyAttributeHandler` and
+  `Inspection\PropertyChangeApplier`, promoted from
+  `kariricode/property-inspector` and reshaped for Spec V4.3.3: `inspect()`
+  takes the attribute class, so one instance serves every processor; the
+  handler contract is `handleAttribute(): void` alone, without the 2.x
+  getters; the applier returns a copy (property-inspector ADR-006), so
+  readonly DPOs can be updated. An exception from the handler, or from a
+  get or set hook of the object, reaches the caller unchanged; the
+  implementations' own failures are `Exception\Runtime`.
+- Unit fixtures `ReflectionPropertyInspector` and `ReflectionChangeApplier`,
+  and 25 tests of the semantics in SPEC-001 §2.4, measured on PHP 8.4.23.
+- The 2.11.0 API snapshot (`tests/Compatibility/fixtures/2.11.0.json`),
+  captured from commit `62dea5b` on main, where 2.11.0 has no tag yet.
+
+### Changed
+
+- The conformance suite covers `KaririCode\Contract\Inspection` (no
+  deviation allowed, criteria C1–C5, synchronous signatures), and
+  `psalm-strict.xml` covers `src/Inspection`.
+- README, SPEC-001 (§2.4, §3, §4, §7, §8.6, §10, §12, §13), the docs index
+  and QD-V40-COMPLIANCE describe 2.12.0.
+
 ## [2.11.0] — 2026-10-01
 
 Additive release (ADR-005, ADR-006). **There is no breaking change:**
