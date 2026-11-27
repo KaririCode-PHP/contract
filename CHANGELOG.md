@@ -5,6 +5,11 @@ The format follows Keep a Changelog; versions follow Semantic Versioning.
 
 ## [Unreleased]
 
+## [2.12.1] — 2026-11-27
+
+Toolchain only: the public API, the source and the gates are the same as
+in 2.12.0.
+
 ### Changed
 
 - The toolchain is installed by KaririCode Devkit (ADR-008): `require-dev`
