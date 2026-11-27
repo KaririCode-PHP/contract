@@ -406,9 +406,32 @@ docs/adr/  docs/spec/  docs/quality/
 - Inherited source and tests are frozen: PHP CS Fixer skips them, and the
   PHPStan and Psalm baselines hold only findings in inherited files.
 
-- Supply chain (ADR-006): `composer.lock` pins the development toolchain;
-  `tools/sbom.php` writes a CycloneDX 1.5 SBOM; `.github/workflows/ci.yml`
-  runs every gate with actions pinned by commit SHA.
+- Supply chain (ADR-006, ADR-008): KaririCode Devkit installs the toolchain
+  pinned in `devkit.php` and runs the root configs; `tools/sbom.php` writes
+  a CycloneDX 1.5 SBOM; `.github/workflows/ci.yml` runs every gate with
+  actions pinned by commit SHA and kcode pinned by SHA-256.
+
+## Development
+
+The package has no QA tool in `require-dev`. [KaririCode Devkit](https://github.com/KaririCode-PHP/devkit) (`kcode`) installs the tools pinned in `devkit.php` into `.kcode/` (git-ignored) and runs this repository's own configs (`'root_configs' => true`).
+
+Install `kcode` once (PHP 8.4+):
+
+```bash
+wget https://github.com/KaririCode-PHP/devkit/releases/latest/download/kcode.phar
+chmod +x kcode.phar
+sudo mv kcode.phar /usr/local/bin/kcode
+```
+
+From the repository root:
+
+```bash
+composer install       # no runtime dependencies
+kcode init             # install the pinned toolchain into .kcode/
+composer check         # style, PHPStan max, Psalm 2 and 1 (strict), all suites
+composer security      # known vulnerabilities in the toolchain
+composer sbom          # CycloneDX 1.5 SBOM
+```
 
 ## Metrics
 

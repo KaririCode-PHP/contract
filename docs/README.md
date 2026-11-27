@@ -14,6 +14,7 @@ why, and the quality record states what has been verified.
 | [ADR-005](adr/ADR-005-shared-cross-cutting-contracts.md) | Decision | cross-cutting contracts: exception families, service providers, identity, serialization marker, request context |
 | [ADR-006](adr/ADR-006-supply-chain.md) | Decision | supply chain: committed lock file, SBOM, audit, CI with pinned actions |
 | [ADR-007](adr/ADR-007-property-inspection-contracts.md) | Decision | property inspection contracts promoted from property-inspector: attribute class as a parameter, handler without getters, copy-on-write applier |
+| [ADR-008](adr/ADR-008-toolchain-through-kcode.md) | Decision | toolchain through KaririCode Devkit with the root configs; tools pinned in devkit.php; amends ADR-006 |
 | [QD-V40-COMPLIANCE](quality/QD-V40-COMPLIANCE.md) | Quality record | gates, local evidence, 3.0.0 items — **PENDING** |
 
 ## Architecture at a glance

@@ -3,6 +3,18 @@
 All notable changes to `kariricode/contract` are documented here.
 The format follows Keep a Changelog; versions follow Semantic Versioning.
 
+## [Unreleased]
+
+### Changed
+
+- The toolchain is installed by KaririCode Devkit (ADR-008): `require-dev`
+  is empty, `devkit.php` pins PHPUnit 11.5.56, PHPStan 2.2.16, Psalm 6.19.1
+  and PHP-CS-Fixer 3.95.27, and kcode runs the root configs, so the gates
+  are unchanged. The Composer scripts call kcode; CI installs kcode 1.2.1
+  after checking its SHA-256.
+- `composer security` audits the toolchain in `.kcode/`; `composer sbom`
+  reads the development components from `.kcode/composer.lock`.
+
 ## [2.12.0] — 2026-10-27
 
 Additive release (ADR-007). **There is no breaking change:**

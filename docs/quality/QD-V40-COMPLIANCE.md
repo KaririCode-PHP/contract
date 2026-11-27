@@ -24,7 +24,7 @@ not the verdict (E-006).
 | Psalm, error level 2 (baseline: inherited files only) | `composer psalm` | pending |
 | Psalm, error level 1 (strict, no baseline): source added since 2.9.0 | `composer psalm-strict` | pending |
 | Coding standard, PER-CS 2.0 set (new code and `tools/`) | `composer cs-check` | pending |
-| Known vulnerabilities in the locked toolchain | `composer security` | pending |
+| Known vulnerabilities in the toolchain installed by kcode (ADR-008) | `composer security` | pending |
 | SBOM | `composer sbom` | pending |
 | Clean install from the release tarball | `composer install` in an empty directory, then the gates above | pending |
 
