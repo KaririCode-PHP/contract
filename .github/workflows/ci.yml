@@ -1,5 +1,7 @@
-# Quality gates of QD-V40-COMPLIANCE §1 (Spec V4.3.3 §29, §32). Actions are
-# pinned by commit SHA; the comment after each pin is the release it resolves to.
+# Quality gates of QD-V40-COMPLIANCE §1 (Spec V4.3.3 §29, §32), run through
+# KaririCode Devkit with the root configs (ADR-008). Actions are pinned by
+# commit SHA, with the release they resolve to in a comment; kcode is pinned
+# by version and SHA-256, and devkit.php pins the tools it installs.
 name: CI
 
 on:
@@ -14,6 +16,10 @@ permissions:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  KCODE_VERSION: 1.2.1
+  KCODE_SHA256: 1bc43b06798b4e7fc1df341cc505f316549f0dd5efb9c8d80031415b0cdf3e3b
 
 jobs:
   gates:
@@ -35,13 +41,22 @@ jobs:
       - name: Validate composer.json and the committed lock file
         run: composer validate --strict
 
-      - name: Install the locked toolchain
+      - name: Install the package (no runtime dependencies)
         run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Install kcode ${{ env.KCODE_VERSION }}, checksum verified
+        run: |
+          curl -fsSLo kcode.phar "https://github.com/KaririCode-PHP/devkit/releases/download/v${KCODE_VERSION}/kcode.phar"
+          echo "${KCODE_SHA256}  kcode.phar" | sha256sum -c -
+          sudo install -m 0755 kcode.phar /usr/local/bin/kcode
+
+      - name: Install the toolchain pinned in devkit.php
+        run: kcode init
 
       - name: Style, PHPStan max, Psalm (level 2 and strict), all test suites
         run: composer check
 
-      - name: Known vulnerabilities in the locked toolchain
+      - name: Known vulnerabilities in the toolchain
         run: composer security
 
       - name: SBOM (CycloneDX 1.5)
