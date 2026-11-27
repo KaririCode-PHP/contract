@@ -47,6 +47,11 @@ $composer = $read($root . '/composer.json');
 $lock = $read($root . '/composer.lock');
 $runtime = (array) ($lock['packages'] ?? []);
 $development = (array) ($lock['packages-dev'] ?? []);
+// The toolchain is installed by kcode (ADR-008); its lock lists the development components.
+if (is_file($root . '/.kcode/composer.lock')) {
+    $toolchain = $read($root . '/.kcode/composer.lock');
+    $development = [...$development, ...(array) ($toolchain['packages'] ?? []), ...(array) ($toolchain['packages-dev'] ?? [])];
+}
 
 $version = ltrim((string) (getenv('COMPOSER_ROOT_VERSION') ?: 'dev-main'), 'v');
 $name = (string) ($composer['name'] ?? '');

@@ -15,12 +15,6 @@
     "require": {
         "php": "^8.4"
     },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.64",
-        "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^11.5",
-        "vimeo/psalm": "^6.0"
-    },
     "autoload": {
         "psr-4": {"KaririCode\\Contract\\": "src/"}
     },
@@ -28,18 +22,18 @@
         "psr-4": {"KaririCode\\Contract\\Tests\\": "tests/"}
     },
     "scripts": {
-        "test": "phpunit",
-        "test-inherited": "phpunit --testsuite=inherited",
-        "test-unit": "phpunit --testsuite=unit",
-        "test-compatibility": "phpunit --testsuite=compatibility",
-        "test-conformance": "phpunit --testsuite=conformance",
-        "phpstan": "phpstan analyse --no-progress",
-        "psalm": "psalm --no-cache",
-        "psalm-strict": "psalm -c psalm-strict.xml --no-cache",
-        "security": "@composer audit --locked",
+        "test": "kcode test",
+        "test-inherited": "kcode test --testsuite=inherited",
+        "test-unit": "kcode test --testsuite=unit",
+        "test-compatibility": "kcode test --testsuite=compatibility",
+        "test-conformance": "kcode test --testsuite=conformance",
+        "phpstan": "kcode run phpstan analyse --no-progress",
+        "psalm": "kcode run psalm --no-cache",
+        "psalm-strict": "kcode run psalm -c psalm-strict.xml --no-cache",
+        "security": "@composer audit --locked --working-dir=.kcode",
         "sbom": "php tools/sbom.php sbom.cdx.json",
-        "cs-check": "php-cs-fixer fix --dry-run --diff",
-        "cs-fix": "php-cs-fixer fix",
+        "cs-check": "kcode cs:fix --check",
+        "cs-fix": "kcode cs:fix",
         "check": ["@cs-check", "@phpstan", "@psalm", "@psalm-strict", "@test"]
     },
     "extra": {
